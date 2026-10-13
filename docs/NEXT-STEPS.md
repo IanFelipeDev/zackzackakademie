@@ -43,6 +43,23 @@ Status on 2026-09-30. Update this file as items are done.
   scoring; character count in Schreiben. Migration 0020 applied 2026-10-01 (types matched). Edge Functions
   redeployed the same day (manage-user deletes recordings with the account). CI green on `main` 23b9d58.
 
+## Audit 2026-10-12 (teacher plan `docs/SITE - ZACK ZACK.md` vs. code on `main` d6a8ed7)
+
+The teacher's plan was stale; cross-checking it against the code confirmed what is really left:
+
+- **Already shipped** (plan still showed open): the whole "URGENTE" telc Sprechen block (catalogue by Teil,
+  status/history, Teil 1 commands + "apresentação preparada", Nachfragen cards, 1.5-min minimum indicator,
+  partner-questions stage, Teil 2 text + speaking-share equity marker, Teil 3 planning + interactive
+  "Decidam juntos" checklist, 20-min preparation timer, stage-signalling stopwatch, the Einleitung→…→Fazit
+  checklist); Schreiben editor (word + character count, stopwatch, Leitpunkte checklist); Flashcards; teacher
+  recording playback.
+- **Still open** (these match "Later phases" below): Simulado real (auto-advancing Teil 1→2→3, random topics,
+  no-pause lock, Teil selector), Stichpunkte-Pad, the 0–75 four-criteria Bewertung calculator + Aprovado≥45
+  (today's Sprechen grade is a flat 0–100 score + comment), audio timeline feedback markers, Lesen, Hören, and
+  the Extras (feedback notifications, unified status names, level filters, student chat/profiles).
+- **Partial**: dashboard shows 2 of 4 skills (Lesen/Hören are "Em breve"); telc Teil 3 has no fixed per-topic
+  Kommando text (it reuses the topic prompt), unlike Teil 1/2.
+
 ## Resume here
 
 - **telc content**: ask the teacher for her "aba TELC" list (Nachfragen per Teil 1 topic, Teil 2 topics with
