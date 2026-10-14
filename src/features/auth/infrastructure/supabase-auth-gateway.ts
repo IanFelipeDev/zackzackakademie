@@ -49,7 +49,7 @@ export class SupabaseAuthGateway implements AuthGateway {
 
     const { data: profile, error: profileError } = await this.client
       .from('profiles')
-      .select('display_name, role, must_change_password, deactivated_at')
+      .select('display_name, role, level, must_change_password, deactivated_at')
       .eq('id', authUser.id)
       .single();
     if (profileError) throw new RepositoryError('Failed to load profile', { cause: profileError });
@@ -65,6 +65,7 @@ export class SupabaseAuthGateway implements AuthGateway {
       email: authUser.email ?? '',
       displayName: profile.display_name,
       role: profile.role,
+      level: profile.level,
       mustChangePassword: profile.must_change_password,
     };
   }

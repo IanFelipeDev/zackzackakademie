@@ -801,6 +801,17 @@ describe('user administration', () => {
     );
   });
 
+  it("sets a student's CEFR level, and offers the level only for students", async () => {
+    const user = userEvent.setup();
+    const backend = signedInAs(ADMIN.email);
+    renderApp('/admin/usuarios', backend);
+
+    await user.selectOptions(await screen.findByLabelText('Nível de Ana'), 'A1');
+    await waitFor(() => expect(backend.userAdmin.users.find((u) => u.id === STUDENT.id)?.level).toBe('A1'));
+    // Staff are not scoped to a level, so they have no level selector.
+    expect(screen.queryByLabelText('Nível de Melissa')).not.toBeInTheDocument();
+  });
+
   it('deactivates an account after confirmation and reactivates it', async () => {
     const user = userEvent.setup();
     const backend = signedInAs(ADMIN.email);

@@ -26,6 +26,7 @@ export const STUDENT: User = {
   email: 'ana@example.com',
   displayName: 'Ana',
   role: 'student',
+  level: 'B2',
   mustChangePassword: false,
 };
 export const TEACHER: User = {
@@ -33,6 +34,7 @@ export const TEACHER: User = {
   email: 'melissa@example.com',
   displayName: 'Melissa',
   role: 'teacher',
+  level: null,
   mustChangePassword: false,
 };
 export const ADMIN: User = {
@@ -40,6 +42,7 @@ export const ADMIN: User = {
   email: 'ian@example.com',
   displayName: 'Ian',
   role: 'admin',
+  level: null,
   mustChangePassword: false,
 };
 export const PASSWORD = 'secret123';
@@ -52,11 +55,12 @@ export function createTestBackend() {
 
   const userAdmin = new InMemoryUserAdminGateway();
   userAdmin.users.push(
-    ...[STUDENT, TEACHER, ADMIN].map(({ id, email, displayName, role }) => ({
+    ...[STUDENT, TEACHER, ADMIN].map(({ id, email, displayName, role, level }) => ({
       id,
       email,
       displayName,
       role,
+      level,
       createdAt: new Date('2026-09-01T00:00:00Z'),
       accessStatus: 'active' as const,
       lastSeenAt: null,

@@ -107,8 +107,12 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   vocabulary cards and one mark per student and card (`known` | `review`, upserted, never deleted).
   `…19_tighten_table_grants`: Supabase's default privileges grant `authenticated` everything on each new table, so
   column or verb restrictions need a `revoke` first (as 0009 and 0019 do); a bare narrower `grant` adds nothing; `…20_speaking_recordings` (ADR-0014): optional practice recordings in the
-  private Storage bucket `speaking-recordings` (`<student id>/<practice id>.<ext>`, `recording_path` on practices).
-- New migrations continue the numbering: `YYYYMMDD` + six-digit sequence (next: `YYYYMMDD000021_<name>.sql`).
+  private Storage bucket `speaking-recordings` (`<student id>/<practice id>.<ext>`, `recording_path` on practices);
+  `…21_cefr_access` (ADR-0015): `profiles.level` scopes each student to one CEFR level, helper `app_current_level()`
+  (fail-closed like `app_current_role()`), content SELECT policies (`units`, `speaking_topics`, `flashcards`) gate
+  students by level while staff see all, and staff assign the level through the `set_student_level(target, new_level)`
+  RPC (so `profiles` needs no column-level update grant); a student with no level sees no content.
+- New migrations continue the numbering: `YYYYMMDD` + six-digit sequence (next: `YYYYMMDD000022_<name>.sql`).
 - Every new table: enable RLS, add policies, add cases to `tests/integration/rls.test.ts`, grant to `authenticated`.
   Edge Function behaviour is covered by `tests/integration/user-admin.test.ts`.
 - `database.types.ts` is generated; regenerate after each migration instead of editing by hand.

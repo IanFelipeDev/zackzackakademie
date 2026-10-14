@@ -35,9 +35,13 @@ export interface TestUser {
 
 const PASSWORD = 'integration-test-password-1';
 
-/** Creates a confirmed user, optionally promotes it (as admin would), and returns a signed-in client. */
+/**
+ * Creates a confirmed user, optionally promotes it (as admin would), and returns a signed-in client.
+ * Students default to level B2, which is the level all seeded content uses, so content tests see it.
+ */
 export async function createUser(
   role: Database['public']['Enums']['app_role'] = 'student',
+  level: Database['public']['Enums']['cefr_level'] | null = role === 'student' ? 'B2' : null,
 ): Promise<TestUser> {
   const email = `${role}-${crypto.randomUUID()}@example.test`;
   const { data, error } = await adminClient.auth.admin.createUser({
@@ -47,9 +51,12 @@ export async function createUser(
     user_metadata: { display_name: `Test ${role}` },
   });
   if (error) throw error;
-  if (role !== 'student') {
-    const { error: roleError } = await adminClient.from('profiles').update({ role }).eq('id', data.user.id);
-    if (roleError) throw roleError;
+  if (role !== 'student' || level !== null) {
+    const { error: updateError } = await adminClient
+      .from('profiles')
+      .update({ role, level })
+      .eq('id', data.user.id);
+    if (updateError) throw updateError;
   }
   const client = anonClient();
   const { error: signInError } = await client.auth.signInWithPassword({ email, password: PASSWORD });

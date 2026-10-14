@@ -1,3 +1,4 @@
+import type { CefrLevel } from '@/shared/domain';
 import type { Role } from './role';
 
 export const PASSWORD_MIN_LENGTH = 8;
@@ -12,6 +13,8 @@ export interface User {
   readonly email: string;
   readonly displayName: string;
   readonly role: Role;
+  /** CEFR level a student is scoped to; null for staff and for students not yet classified. */
+  readonly level: CefrLevel | null;
   /** Still on the temporary password from the access email; must choose their own before using the app. */
   readonly mustChangePassword: boolean;
 }

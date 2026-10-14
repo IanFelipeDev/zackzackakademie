@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useContainer } from '@/app/context/container-context';
 import { LOGIN_PATH } from '@/features/auth';
-import { ROLES, type Role } from '@/shared/domain';
+import { CEFR_LEVELS, type CefrLevel, ROLES, type Role } from '@/shared/domain';
 import { Alert, Badge, Button, formatDate, Icon } from '@/shared/ui';
 import type { AccessStatus, ManagedUser } from '../domain/managed-user';
 import { PresenceLabel } from './presence-label';
@@ -37,6 +37,10 @@ export function UserRow({ user, currentUserId, now }: UserRowProps) {
     mutationFn: (role: Role) => users.changeUserRole.execute({ ...target, role }),
     onSettled: refresh,
   });
+  const setLevel = useMutation({
+    mutationFn: (level: CefrLevel) => users.setStudentLevel.execute({ userId: user.id, level }),
+    onSettled: refresh,
+  });
   const resend = useMutation({
     mutationFn: () => users.resendAccess.execute(target, `${window.location.origin}${LOGIN_PATH}`),
     onSettled: refresh,
@@ -51,8 +55,9 @@ export function UserRow({ user, currentUserId, now }: UserRowProps) {
     mutationFn: () => users.deleteUser.execute(target),
     onSettled: refresh,
   });
-  const failed = [changeRole, resend, setActive, remove].find((mutation) => mutation.isError);
-  const isBusy = changeRole.isPending || resend.isPending || setActive.isPending || remove.isPending;
+  const failed = [changeRole, setLevel, resend, setActive, remove].find((mutation) => mutation.isError);
+  const isBusy =
+    changeRole.isPending || setLevel.isPending || resend.isPending || setActive.isPending || remove.isPending;
   const badge = user.accessStatus === 'active' ? null : STATUS_BADGES[user.accessStatus];
 
   return (
@@ -69,25 +74,50 @@ export function UserRow({ user, currentUserId, now }: UserRowProps) {
           </p>
           <PresenceLabel lastSeenAt={user.lastSeenAt} now={now} />
         </div>
-        <label className="flex items-center gap-2 text-sm">
-          <span className="sr-only">Papel de {user.displayName}</span>
-          <select
-            value={user.role}
-            disabled={isSelf || isDeactivated || isBusy}
-            title={isSelf ? 'Você não pode alterar o seu próprio papel.' : undefined}
-            onChange={(event) => changeRole.mutate(event.target.value as Role)}
-            className="rounded-lg border border-hairline bg-surface-lowest px-3 py-2 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {ROLES.map((role) => (
-              <option key={role} value={role}>
-                {ROLE_LABELS[role]}
-              </option>
-            ))}
-          </select>
-          {changeRole.isPending ? (
-            <Icon name="progress_activity" className="animate-spin text-[18px]" />
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 text-sm">
+            <span className="sr-only">Papel de {user.displayName}</span>
+            <select
+              value={user.role}
+              disabled={isSelf || isDeactivated || isBusy}
+              title={isSelf ? 'Você não pode alterar o seu próprio papel.' : undefined}
+              onChange={(event) => changeRole.mutate(event.target.value as Role)}
+              className="rounded-lg border border-hairline bg-surface-lowest px-3 py-2 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {ROLE_LABELS[role]}
+                </option>
+              ))}
+            </select>
+            {changeRole.isPending ? (
+              <Icon name="progress_activity" className="animate-spin text-[18px]" />
+            ) : null}
+          </label>
+          {user.role === 'student' ? (
+            <label className="flex items-center gap-2 text-sm">
+              <span className="sr-only">Nível de {user.displayName}</span>
+              <select
+                value={user.level ?? ''}
+                disabled={isDeactivated || isBusy}
+                onChange={(event) => setLevel.mutate(event.target.value as CefrLevel)}
+                className="rounded-lg border border-hairline bg-surface-lowest px-3 py-2 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <option value="" disabled>
+                  Nível…
+                </option>
+                {CEFR_LEVELS.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
+              {setLevel.isPending ? (
+                <Icon name="progress_activity" className="animate-spin text-[18px]" />
+              ) : null}
+            </label>
           ) : null}
-        </label>
+        </div>
       </div>
 
       {isSelf ? null : (

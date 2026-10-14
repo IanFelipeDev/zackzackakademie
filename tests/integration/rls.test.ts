@@ -667,3 +667,99 @@ describe('writing drafts', () => {
     expect(error).not.toBeNull();
   });
 });
+
+describe('cefr level access', () => {
+  // The shared `student` is B2 (createUser's default), matching all seeded content.
+  let a1Student: TestUser;
+  let unclassified: TestUser;
+  let a1CardId: string;
+  let b2CardId: string;
+
+  beforeAll(async () => {
+    [a1Student, unclassified] = await Promise.all([createUser('student', 'A1'), createUser('student', null)]);
+    const { data: b2 } = await adminClient
+      .from('flashcards')
+      .select('id')
+      .eq('level', 'B2')
+      .limit(1)
+      .single();
+    b2CardId = b2?.id ?? '';
+    const { data: a1 } = await adminClient
+      .from('flashcards')
+      .insert({
+        level: 'A1',
+        category: 'general',
+        position: 970001,
+        term: 'Haus',
+        translation: 'casa',
+        is_published: true,
+      })
+      .select('id')
+      .single();
+    a1CardId = a1?.id ?? '';
+  });
+
+  it('shows a student only the content of their level', async () => {
+    const a1Sees = await a1Student.client.from('flashcards').select('id').in('id', [a1CardId, b2CardId]);
+    const b2Sees = await student.client.from('flashcards').select('id').in('id', [a1CardId, b2CardId]);
+    expect(a1Sees.data?.map((c) => c.id)).toEqual([a1CardId]);
+    expect(b2Sees.data?.map((c) => c.id)).toEqual([b2CardId]);
+  });
+
+  it('shows staff every level', async () => {
+    const teacherSees = await teacher.client.from('flashcards').select('id').in('id', [a1CardId, b2CardId]);
+    expect(new Set(teacherSees.data?.map((c) => c.id))).toEqual(new Set([a1CardId, b2CardId]));
+  });
+
+  it('shows an unclassified student no course content (fail-closed)', async () => {
+    const cards = await unclassified.client.from('flashcards').select('id', { count: 'exact', head: true });
+    const topics = await unclassified.client
+      .from('speaking_topics')
+      .select('id', { count: 'exact', head: true });
+    const exercises = await unclassified.client
+      .from('exercises')
+      .select('id', { count: 'exact', head: true });
+    expect(cards.count).toBe(0);
+    expect(topics.count).toBe(0);
+    expect(exercises.count).toBe(0);
+  });
+
+  it('gates student writes by level too', async () => {
+    // An A1 student cannot mark a B2 card: the insert policy requires the card to be visible to them.
+    const mark = await a1Student.client.from('flashcard_marks').upsert(
+      {
+        student_id: a1Student.id,
+        flashcard_id: b2CardId,
+        status: 'known',
+        updated_at: '2000-01-01T00:00:00Z',
+      },
+      { onConflict: 'student_id,flashcard_id' },
+    );
+    expect(mark.error).not.toBeNull();
+  });
+
+  it('lets only staff set a student level, and only on a student', async () => {
+    const byTeacher = await teacher.client.rpc('set_student_level', {
+      target: a1Student.id,
+      new_level: 'B1',
+    });
+    const { data: moved } = await adminClient
+      .from('profiles')
+      .select('level')
+      .eq('id', a1Student.id)
+      .single();
+    const byStudent = await student.client.rpc('set_student_level', {
+      target: otherStudent.id,
+      new_level: 'A1',
+    });
+    const onNonStudent = await teacher.client.rpc('set_student_level', {
+      target: teacher.id,
+      new_level: 'A1',
+    });
+
+    expect(byTeacher.error).toBeNull();
+    expect(moved?.level).toBe('B1');
+    expect(byStudent.error).not.toBeNull();
+    expect(onNonStudent.error).not.toBeNull();
+  });
+});

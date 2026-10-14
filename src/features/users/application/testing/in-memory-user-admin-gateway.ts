@@ -1,5 +1,10 @@
-import type { Role } from '@/shared/domain';
-import { InviteEmailTakenError, UserDeactivatedError, UserHasReviewsError } from '../../domain/errors';
+import type { CefrLevel, Role } from '@/shared/domain';
+import {
+  InviteEmailTakenError,
+  UserAdminForbiddenError,
+  UserDeactivatedError,
+  UserHasReviewsError,
+} from '../../domain/errors';
 import type { Invitation } from '../../domain/invitation';
 import type { ManagedUser } from '../../domain/managed-user';
 import type { UserAdminGateway } from '../ports/user-admin-gateway';
@@ -24,6 +29,7 @@ export class InMemoryUserAdminGateway implements UserAdminGateway {
       email: invitation.email,
       displayName: invitation.displayName,
       role: invitation.role,
+      level: null,
       createdAt: new Date(),
       accessStatus: 'pending_first_access',
       lastSeenAt: null,
@@ -34,6 +40,13 @@ export class InMemoryUserAdminGateway implements UserAdminGateway {
 
   changeRole(userId: string, role: Role): Promise<void> {
     this.update(userId, { role });
+    return Promise.resolve();
+  }
+
+  setStudentLevel(userId: string, level: CefrLevel): Promise<void> {
+    // Mirrors the set_student_level RPC: only a student may be levelled.
+    if (this.find(userId)?.role !== 'student') return Promise.reject(new UserAdminForbiddenError());
+    this.update(userId, { level });
     return Promise.resolve();
   }
 

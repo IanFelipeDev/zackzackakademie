@@ -246,6 +246,7 @@ export type Database = {
           display_name: string
           email: string | null
           id: string
+          level: Database["public"]["Enums"]["cefr_level"] | null
           must_change_password: boolean
           role: Database["public"]["Enums"]["app_role"]
         }
@@ -255,6 +256,7 @@ export type Database = {
           display_name: string
           email?: string | null
           id: string
+          level?: Database["public"]["Enums"]["cefr_level"] | null
           must_change_password?: boolean
           role?: Database["public"]["Enums"]["app_role"]
         }
@@ -264,6 +266,7 @@ export type Database = {
           display_name?: string
           email?: string | null
           id?: string
+          level?: Database["public"]["Enums"]["cefr_level"] | null
           must_change_password?: boolean
           role?: Database["public"]["Enums"]["app_role"]
         }
@@ -558,9 +561,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      app_current_level: {
+        Args: never
+        Returns: Database["public"]["Enums"]["cefr_level"]
+      }
       app_current_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      set_student_level: {
+        Args: {
+          new_level: Database["public"]["Enums"]["cefr_level"]
+          target: string
+        }
+        Returns: undefined
       }
       touch_presence: { Args: never; Returns: undefined }
     }

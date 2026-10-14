@@ -1,4 +1,4 @@
-import type { Role } from '@/shared/domain';
+import type { CefrLevel, Role } from '@/shared/domain';
 import type { Invitation } from '../../domain/invitation';
 import type { ManagedUser } from '../../domain/managed-user';
 
@@ -13,6 +13,11 @@ export interface UserAdminGateway {
   invite(invitation: Invitation, loginUrl: string): Promise<void>;
   /** @throws {UserAdminForbiddenError} when the backend refuses the change */
   changeRole(userId: string, role: Role): Promise<void>;
+  /**
+   * Sets a student's CEFR level, which scopes the content they can see.
+   * @throws {UserAdminForbiddenError} when the caller is not staff or the target is not a student
+   */
+  setStudentLevel(userId: string, level: CefrLevel): Promise<void>;
   /** Issues a new temporary password by email and lifts an expiry block. */
   resendAccess(userId: string, loginUrl: string): Promise<void>;
   /** Blocks sign-in and all permissions, keeping history. */

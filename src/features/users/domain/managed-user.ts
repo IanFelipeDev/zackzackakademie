@@ -1,4 +1,4 @@
-import type { Role } from '@/shared/domain';
+import type { CefrLevel, Role } from '@/shared/domain';
 
 /**
  * - pending_first_access: still on the emailed temporary password (valid until the first sign-in)
@@ -13,6 +13,8 @@ export interface ManagedUser {
   readonly email: string | null;
   readonly displayName: string;
   readonly role: Role;
+  /** CEFR level for students; null for staff and for students not yet classified. */
+  readonly level: CefrLevel | null;
   readonly createdAt: Date;
   readonly accessStatus: AccessStatus;
   /** Last activity reported by the app; null when the person never used it since presence was tracked. */
