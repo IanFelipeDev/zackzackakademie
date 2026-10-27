@@ -31,12 +31,18 @@ create policy "read published lessons of visible units, staff read all" on publi
     or (is_published and exists (select 1 from public.units u where u.id = lessons.unit_id))
   );
 
--- Speaking topics.
-drop policy "read published topics, staff reads all" on public.speaking_topics;
-create policy "read published topics of own level, staff read all" on public.speaking_topics for select to authenticated
+-- Speaking topics. Migration 0013 renamed this policy to "read published or practised topics, …"; drop that one.
+-- Add the level gate for browsing published topics, but keep 0013's practised-topic exception so a student's
+-- own history stays visible even for an unpublished topic (ADR-0015: history is keyed by ownership, not level).
+drop policy "read published or practised topics, staff reads all" on public.speaking_topics;
+create policy "read published topics of own level or practised, staff read all" on public.speaking_topics for select to authenticated
   using (
     public.app_current_role() in ('teacher', 'admin')
     or (is_published and level = public.app_current_level())
+    or exists (
+      select 1 from public.speaking_practices p
+      where p.topic_id = speaking_topics.id and p.student_id = auth.uid()
+    )
   );
 
 -- Flashcards.
