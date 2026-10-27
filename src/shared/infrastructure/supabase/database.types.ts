@@ -174,6 +174,8 @@ export type Database = {
       flashcards: {
         Row: {
           category: string
+          extra: string | null
+          extra_kind: string | null
           id: string
           is_published: boolean
           level: Database["public"]["Enums"]["cefr_level"]
@@ -181,9 +183,12 @@ export type Database = {
           synonyms: string[]
           term: string
           translation: string
+          word_type: string | null
         }
         Insert: {
           category: string
+          extra?: string | null
+          extra_kind?: string | null
           id?: string
           is_published?: boolean
           level: Database["public"]["Enums"]["cefr_level"]
@@ -191,9 +196,12 @@ export type Database = {
           synonyms?: string[]
           term: string
           translation: string
+          word_type?: string | null
         }
         Update: {
           category?: string
+          extra?: string | null
+          extra_kind?: string | null
           id?: string
           is_published?: boolean
           level?: Database["public"]["Enums"]["cefr_level"]
@@ -201,6 +209,7 @@ export type Database = {
           synonyms?: string[]
           term?: string
           translation?: string
+          word_type?: string | null
         }
         Relationships: []
       }

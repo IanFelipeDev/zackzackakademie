@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { countStatuses, isMarkStatus } from './card-status';
 import { filterDeck, shuffle, type DeckCard } from './deck';
-import { isFlashcardCategory, sortFlashcards, splitArticle, type Flashcard } from './flashcard';
+import {
+  isExtraKind,
+  isFlashcardCategory,
+  isWordType,
+  sortFlashcards,
+  splitArticle,
+  type Flashcard,
+} from './flashcard';
 
 function card(overrides: Partial<Flashcard> = {}): Flashcard {
   return {
@@ -12,27 +19,37 @@ function card(overrides: Partial<Flashcard> = {}): Flashcard {
     term: 'der Lebenslauf',
     translation: 'currículo',
     synonyms: [],
+    wordType: null,
+    extra: null,
+    extraKind: null,
     ...overrides,
   };
 }
 
 describe('flashcard', () => {
-  it('recognises the known categories and mark statuses', () => {
+  it('recognises the known B2 categories, word types, extra kinds and mark statuses', () => {
     expect(isFlashcardCategory('verbs')).toBe(true);
-    expect(isFlashcardCategory('trabalho')).toBe(false);
+    expect(isFlashcardCategory('familia')).toBe(false);
+    expect(isWordType('noun')).toBe(true);
+    expect(isWordType('substantivo')).toBe(false);
+    expect(isExtraKind('perfekt')).toBe(true);
+    expect(isExtraKind('plural')).toBe(true);
+    expect(isExtraKind('genitive')).toBe(false);
     expect(isMarkStatus('review')).toBe(true);
     expect(isMarkStatus('new')).toBe(false);
   });
 
-  it('sorts by category order, then position', () => {
+  it('sorts known themes first (in order), then unknown themes alphabetically, then position', () => {
     const cards = [
+      card({ id: 'z1', category: 'familia', position: 2 }),
       card({ id: 'g1', category: 'general', position: 1 }),
+      card({ id: 'a1', category: 'animais', position: 1 }),
       card({ id: 'w2', category: 'work', position: 2 }),
-      card({ id: 'v1', category: 'verbs', position: 1 }),
+      card({ id: 'z0', category: 'familia', position: 1 }),
       card({ id: 'w1', category: 'work', position: 1 }),
     ];
-    expect(sortFlashcards(cards).map((c) => c.id)).toEqual(['w1', 'w2', 'v1', 'g1']);
-    expect(cards[0]?.id).toBe('g1');
+    // Known B2 themes (work, then general) come first; then unknown slugs alphabetically (animais, familia).
+    expect(sortFlashcards(cards).map((c) => c.id)).toEqual(['w1', 'w2', 'g1', 'a1', 'z0', 'z1']);
   });
 
   it.each([
@@ -61,17 +78,23 @@ describe('statuses', () => {
 
 describe('deck', () => {
   const deck: DeckCard[] = [
-    { card: card({ id: 'a', category: 'work' }), status: 'new' },
-    { card: card({ id: 'b', category: 'work' }), status: 'review' },
-    { card: card({ id: 'c', category: 'verbs' }), status: 'review' },
-    { card: card({ id: 'd', category: 'verbs' }), status: 'known' },
+    { card: card({ id: 'a', category: 'familia', wordType: 'noun' }), status: 'new' },
+    { card: card({ id: 'b', category: 'familia', wordType: 'noun' }), status: 'review' },
+    { card: card({ id: 'c', category: 'cumprimentos', wordType: 'phrase' }), status: 'review' },
+    { card: card({ id: 'd', category: 'cumprimentos', wordType: 'phrase' }), status: 'known' },
   ];
 
-  it('filters by category and status, keeping the order', () => {
-    expect(filterDeck(deck, { category: 'all', status: 'all' })).toEqual(['a', 'b', 'c', 'd']);
-    expect(filterDeck(deck, { category: 'work', status: 'all' })).toEqual(['a', 'b']);
-    expect(filterDeck(deck, { category: 'all', status: 'review' })).toEqual(['b', 'c']);
-    expect(filterDeck(deck, { category: 'verbs', status: 'new' })).toEqual([]);
+  it('filters by category, word type and status, keeping the order', () => {
+    expect(filterDeck(deck, { category: 'all', wordType: 'all', status: 'all' })).toEqual([
+      'a',
+      'b',
+      'c',
+      'd',
+    ]);
+    expect(filterDeck(deck, { category: 'familia', wordType: 'all', status: 'all' })).toEqual(['a', 'b']);
+    expect(filterDeck(deck, { category: 'all', wordType: 'phrase', status: 'all' })).toEqual(['c', 'd']);
+    expect(filterDeck(deck, { category: 'all', wordType: 'noun', status: 'review' })).toEqual(['b']);
+    expect(filterDeck(deck, { category: 'cumprimentos', wordType: 'noun', status: 'all' })).toEqual([]);
   });
 
   it('shuffles into a new array with the same items', () => {

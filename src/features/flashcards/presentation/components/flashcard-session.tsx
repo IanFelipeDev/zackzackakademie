@@ -3,7 +3,7 @@ import { Badge, Button, EmptyState, Icon } from '@/shared/ui';
 import type { CardStatus, MarkStatus } from '../../domain/card-status';
 import { filterDeck, shuffle, type DeckCard, type DeckFilter } from '../../domain/deck';
 import { STATUS_LABELS } from '../flashcard-labels';
-import { FlashcardView } from './flashcard-view';
+import { FlashcardView, type StudyDirection } from './flashcard-view';
 import { PronunciationRecorder } from './pronunciation-recorder';
 
 const EMPTY_MESSAGES: Record<CardStatus | 'all', { title: string; body: string }> = {
@@ -26,6 +26,7 @@ interface FlashcardSessionProps {
   /** Every card with its live status; statuses change as the student marks cards. */
   readonly cards: readonly DeckCard[];
   readonly filter: DeckFilter;
+  readonly direction: StudyDirection;
   readonly onMark: (flashcardId: string, status: MarkStatus) => void;
 }
 
@@ -33,7 +34,7 @@ interface FlashcardSessionProps {
  * One pass through the cards matching the filter. The order is fixed when the session starts, so a card does
  * not vanish from the pass when marking changes its status; the parent remounts the session when the filter changes.
  */
-export function FlashcardSession({ cards, filter, onMark }: FlashcardSessionProps) {
+export function FlashcardSession({ cards, filter, direction, onMark }: FlashcardSessionProps) {
   const [order, setOrder] = useState(() => filterDeck(cards, filter));
   const [index, setIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -100,6 +101,7 @@ export function FlashcardSession({ cards, filter, onMark }: FlashcardSessionProp
       <FlashcardView
         key={current.card.id}
         card={current.card}
+        direction={direction}
         isFlipped={isFlipped}
         onFlip={() => setIsFlipped((flipped) => !flipped)}
       />

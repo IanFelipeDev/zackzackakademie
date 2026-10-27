@@ -763,3 +763,60 @@ describe('cefr level access', () => {
     expect(onNonStudent.error).not.toBeNull();
   });
 });
+
+describe('cefr level isolation (A1/A2/B1/B2)', () => {
+  const LEVELS = ['A1', 'A2', 'B1', 'B2'] as const;
+  type Level = (typeof LEVELS)[number];
+  const students = {} as Record<Level, TestUser>;
+  const probeId = {} as Record<Level, string>;
+
+  beforeAll(async () => {
+    await Promise.all(
+      LEVELS.map(async (level, i) => {
+        students[level] = await createUser('student', level);
+        const { data } = await adminClient
+          .from('flashcards')
+          .insert({
+            level,
+            category: 'general',
+            position: 980001 + i,
+            term: `Sonde-${level}`,
+            translation: `sonda ${level}`,
+            is_published: true,
+          })
+          .select('id')
+          .single();
+        probeId[level] = data?.id ?? '';
+      }),
+    );
+  });
+
+  it('shows each level only its own card and none of the other three', async () => {
+    const allProbes = LEVELS.map((l) => probeId[l]);
+    for (const level of LEVELS) {
+      const seen = await students[level].client.from('flashcards').select('id').in('id', allProbes);
+      expect(seen.data?.map((c) => c.id)).toEqual([probeId[level]]);
+    }
+  });
+
+  it('never leaks a row of another level: every visible card matches the student level', async () => {
+    for (const level of LEVELS) {
+      const { data } = await students[level].client.from('flashcards').select('level');
+      const distinct = new Set((data ?? []).map((c) => c.level));
+      expect([...distinct]).toEqual([level]);
+    }
+  });
+
+  it('gates the seeded A1–A2 vocabulary to the matching level', async () => {
+    // "die Mutter" is seeded only at A1 (familia); "der Bahnhof" only at A2 (cidade-e-transporte).
+    const a1Mutter = await students.A1.client.from('flashcards').select('level').eq('term', 'die Mutter');
+    const a2Mutter = await students.A2.client.from('flashcards').select('id').eq('term', 'die Mutter');
+    const a2Bahnhof = await students.A2.client.from('flashcards').select('level').eq('term', 'der Bahnhof');
+    const b1Bahnhof = await students.B1.client.from('flashcards').select('id').eq('term', 'der Bahnhof');
+
+    expect(a1Mutter.data).toEqual([{ level: 'A1' }]);
+    expect(a2Mutter.data).toHaveLength(0);
+    expect(a2Bahnhof.data).toEqual([{ level: 'A2' }]);
+    expect(b1Bahnhof.data).toHaveLength(0);
+  });
+});
