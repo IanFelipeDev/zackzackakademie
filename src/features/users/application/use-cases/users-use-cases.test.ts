@@ -3,6 +3,7 @@ import {
   CannotManageOwnAccountError,
   InvalidInvitationError,
   InviteEmailTakenError,
+  UserAdminForbiddenError,
   UserDeactivatedError,
   UserHasReviewsError,
 } from '../../domain/errors';
@@ -12,6 +13,7 @@ import { ChangeUserRole } from './change-user-role';
 import { InviteUser } from './invite-user';
 import { ListUsers } from './list-users';
 import { DeactivateUser, DeleteUser, ReactivateUser, ResendAccess } from './manage-user-access';
+import { SetStudentLevel } from './set-student-level';
 
 const LOGIN_URL = 'https://app.example/entrar';
 const ADMIN = 'admin-1';
@@ -23,6 +25,7 @@ function buildUser(overrides: Partial<ManagedUser>): ManagedUser {
     email: 'user@example.com',
     displayName: 'User',
     role: 'student',
+    level: null,
     createdAt: new Date(),
     accessStatus: 'active',
     lastSeenAt: null,
@@ -81,6 +84,19 @@ describe('ChangeUserRole', () => {
   it("changes another user's role", async () => {
     await new ChangeUserRole(gateway).execute({ actorId: ADMIN, userId: STUDENT, role: 'teacher' });
     expect(gateway.users.find((u) => u.id === STUDENT)?.role).toBe('teacher');
+  });
+});
+
+describe('SetStudentLevel', () => {
+  it("sets a student's CEFR level", async () => {
+    await new SetStudentLevel(gateway).execute({ userId: STUDENT, level: 'B1' });
+    expect(gateway.users.find((u) => u.id === STUDENT)?.level).toBe('B1');
+  });
+
+  it('refuses to level a non-student', async () => {
+    await expect(new SetStudentLevel(gateway).execute({ userId: ADMIN, level: 'B1' })).rejects.toBeInstanceOf(
+      UserAdminForbiddenError,
+    );
   });
 });
 

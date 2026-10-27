@@ -45,6 +45,18 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Resume here
 
+- **CEFR level access** (ADR-0015, `feat/cefr-level-access`, migration 0021): students are scoped to
+  `profiles.level` and RLS shows each student only their level; staff assign it from `/admin/usuarios` via the
+  `set_student_level` RPC. Fail-closed: a student with no level sees no content. **Not yet applied** — run
+  `npm run db:push` then `npm run db:types:remote` and confirm the regenerated types match the committed ones.
+  Caveat: all seeded content is B2, so until A1/A2/B1 content is authored, students must be set to B2 to see
+  anything. After the migration, set every existing student's level in `/admin/usuarios`.
+- **A1–A2 flashcards** (ADR-0016, `feat/flashcards-a1-a2`, migrations 0022–0023): ~880 A1/A2 vocabulary cards with
+  word type, theme and a grammatical extra (plural/Perfekt/case); the page gains a word-type filter, a theme
+  dropdown, a DE↔PT toggle, a "só pendentes" shortcut and a level-aware header. B2 unchanged; level gating stays
+  exact-match (four-level isolation tested in `rls.test.ts`). **Not yet applied** — run `npm run db:push` then
+  `npm run db:types:remote` and confirm the regenerated types match the committed ones. Then assign A1/A2 students
+  their level in `/admin/usuarios`.
 - **telc content**: ask the teacher for her "aba TELC" list (Nachfragen per Teil 1 topic, Teil 2 topics with
   texts, Teil 3 tasks) to replace the starting content of migration 0016, and for the third priority of her site
   plan that was unclear. Check `/sprechen?prova=telc` on a phone after the deploy.

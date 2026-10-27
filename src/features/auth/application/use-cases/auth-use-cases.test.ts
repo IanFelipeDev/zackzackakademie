@@ -15,6 +15,7 @@ const ANA: User = {
   email: 'ana@example.com',
   displayName: 'Ana',
   role: 'student',
+  level: 'B2',
   mustChangePassword: false,
 };
 const PASSWORD = 'secret123';

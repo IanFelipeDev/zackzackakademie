@@ -3,15 +3,25 @@ import { RepositoryError } from '@/shared/infrastructure/repository-error';
 import type { Database } from '@/shared/infrastructure/supabase/database.types';
 import type { FlashcardMark } from '../application/ports/flashcard-mark-repository';
 import { isMarkStatus } from '../domain/card-status';
-import { isFlashcardCategory, type Flashcard, type FlashcardCategory } from '../domain/flashcard';
+import { isExtraKind, isWordType, type ExtraKind, type Flashcard, type WordType } from '../domain/flashcard';
 
 type Tables = Database['public']['Tables'];
 
-export const FLASHCARD_COLUMNS = 'id, level, category, position, term, translation, synonyms';
+export const FLASHCARD_COLUMNS =
+  'id, level, category, position, term, translation, synonyms, word_type, extra, extra_kind';
 
 export type FlashcardRow = Pick<
   Tables['flashcards']['Row'],
-  'id' | 'level' | 'category' | 'position' | 'term' | 'translation' | 'synonyms'
+  | 'id'
+  | 'level'
+  | 'category'
+  | 'position'
+  | 'term'
+  | 'translation'
+  | 'synonyms'
+  | 'word_type'
+  | 'extra'
+  | 'extra_kind'
 >;
 
 export const MARK_COLUMNS = 'flashcard_id, status';
@@ -23,8 +33,20 @@ function toLevel(value: string): CefrLevel {
   return value;
 }
 
-function toCategory(value: string): FlashcardCategory {
-  if (!isFlashcardCategory(value)) throw new RepositoryError(`Unknown flashcard category: ${value}`);
+function toCategory(value: string): string {
+  if (!/^[a-z0-9-]+$/.test(value)) throw new RepositoryError(`Invalid flashcard category: ${value}`);
+  return value;
+}
+
+function toWordType(value: string | null): WordType | null {
+  if (value === null) return null;
+  if (!isWordType(value)) throw new RepositoryError(`Unknown flashcard word type: ${value}`);
+  return value;
+}
+
+function toExtraKind(value: string | null): ExtraKind | null {
+  if (value === null) return null;
+  if (!isExtraKind(value)) throw new RepositoryError(`Unknown flashcard extra kind: ${value}`);
   return value;
 }
 
@@ -37,6 +59,9 @@ export function toFlashcard(row: FlashcardRow): Flashcard {
     term: row.term,
     translation: row.translation,
     synonyms: row.synonyms,
+    wordType: toWordType(row.word_type),
+    extra: row.extra,
+    extraKind: toExtraKind(row.extra_kind),
   };
 }
 

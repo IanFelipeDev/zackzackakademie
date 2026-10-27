@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -174,6 +174,8 @@ export type Database = {
       flashcards: {
         Row: {
           category: string
+          extra: string | null
+          extra_kind: string | null
           id: string
           is_published: boolean
           level: Database["public"]["Enums"]["cefr_level"]
@@ -181,9 +183,12 @@ export type Database = {
           synonyms: string[]
           term: string
           translation: string
+          word_type: string | null
         }
         Insert: {
           category: string
+          extra?: string | null
+          extra_kind?: string | null
           id?: string
           is_published?: boolean
           level: Database["public"]["Enums"]["cefr_level"]
@@ -191,9 +196,12 @@ export type Database = {
           synonyms?: string[]
           term: string
           translation: string
+          word_type?: string | null
         }
         Update: {
           category?: string
+          extra?: string | null
+          extra_kind?: string | null
           id?: string
           is_published?: boolean
           level?: Database["public"]["Enums"]["cefr_level"]
@@ -201,6 +209,7 @@ export type Database = {
           synonyms?: string[]
           term?: string
           translation?: string
+          word_type?: string | null
         }
         Relationships: []
       }
@@ -246,6 +255,7 @@ export type Database = {
           display_name: string
           email: string | null
           id: string
+          level: Database["public"]["Enums"]["cefr_level"] | null
           must_change_password: boolean
           role: Database["public"]["Enums"]["app_role"]
         }
@@ -255,6 +265,7 @@ export type Database = {
           display_name: string
           email?: string | null
           id: string
+          level?: Database["public"]["Enums"]["cefr_level"] | null
           must_change_password?: boolean
           role?: Database["public"]["Enums"]["app_role"]
         }
@@ -264,6 +275,7 @@ export type Database = {
           display_name?: string
           email?: string | null
           id?: string
+          level?: Database["public"]["Enums"]["cefr_level"] | null
           must_change_password?: boolean
           role?: Database["public"]["Enums"]["app_role"]
         }
@@ -558,9 +570,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      app_current_level: {
+        Args: never
+        Returns: Database["public"]["Enums"]["cefr_level"]
+      }
       app_current_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      set_student_level: {
+        Args: {
+          new_level: Database["public"]["Enums"]["cefr_level"]
+          target: string
+        }
+        Returns: undefined
       }
       touch_presence: { Args: never; Returns: undefined }
     }

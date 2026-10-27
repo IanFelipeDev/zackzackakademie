@@ -63,7 +63,7 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   `queryClient.resetQueries()` so no cached data survives a user switch. `RequireRole` is UX only; RLS is the real
   boundary. `/` is the public landing page (ADR-0011; texts in `landing-content.ts`). Students own `/painel` (their home: performance dashboard), `/treino` and `/meus-textos`; teacher/admin own `/revisoes` (queue) and `/revisoes/historico`
   (corrected texts; feedback can be revised there, overwriting the old version) and `/avaliacoes-orais`
-  (Sprechen scores); students also own `/sprechen` (`?prova=telc&teil=1..3` for telc, Goethe by default) and `/flashcards` (vocabulary, ADR-0013); admin owns
+  (Sprechen scores); students also own `/sprechen` (`?prova=telc&teil=1..3` for telc, Goethe by default) and `/flashcards` (vocabulary, ADR-0013/0016: B2 by category, plus A1/A2 by word type + theme, with DE↔PT toggle); admin owns
   `/admin/usuarios`. `Role` lives in `shared/domain` because several features need it.
 - **User admin** (ADR-0004, ADR-0005, ADR-0007): listing users and changing roles go straight to `profiles` under RLS.
   Online status / last access (ADR-0010): `usePresenceHeartbeat` in `AppLayout` calls `auth.recordActivity`
@@ -107,8 +107,16 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   vocabulary cards and one mark per student and card (`known` | `review`, upserted, never deleted).
   `…19_tighten_table_grants`: Supabase's default privileges grant `authenticated` everything on each new table, so
   column or verb restrictions need a `revoke` first (as 0009 and 0019 do); a bare narrower `grant` adds nothing; `…20_speaking_recordings` (ADR-0014): optional practice recordings in the
-  private Storage bucket `speaking-recordings` (`<student id>/<practice id>.<ext>`, `recording_path` on practices).
-- New migrations continue the numbering: `YYYYMMDD` + six-digit sequence (next: `YYYYMMDD000021_<name>.sql`).
+  private Storage bucket `speaking-recordings` (`<student id>/<practice id>.<ext>`, `recording_path` on practices);
+  `…21_cefr_access` (ADR-0015): `profiles.level` scopes each student to one CEFR level, helper `app_current_level()`
+  (fail-closed like `app_current_role()`), content SELECT policies (`units`, `speaking_topics`, `flashcards`) gate
+  students by level while staff see all, and staff assign the level through the `set_student_level(target, new_level)`
+  RPC (so `profiles` needs no column-level update grant); a student with no level sees no content.
+  `…22_flashcards_metadata` + `…23_flashcards_a1_a2_content` (ADR-0016): generalize `flashcards.category` to a free
+  theme slug and add nullable `word_type`, `extra`, `extra_kind`; seed ~880 A1/A2 cards (generated, not hand-written;
+  deterministic ids, continuous positions per level+theme). B2 keeps the new columns null and is unchanged; level
+  gating stays exact-match (A1≠A2≠B1≠B2), covered by the four-level isolation tests in `rls.test.ts`.
+- New migrations continue the numbering: `YYYYMMDD` + six-digit sequence (next: `YYYYMMDD000024_<name>.sql`).
 - Every new table: enable RLS, add policies, add cases to `tests/integration/rls.test.ts`, grant to `authenticated`.
   Edge Function behaviour is covered by `tests/integration/user-admin.test.ts`.
 - `database.types.ts` is generated; regenerate after each migration instead of editing by hand.

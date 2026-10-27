@@ -74,6 +74,7 @@ import {
   ReactivateUser,
   ResendAccess,
 } from '@/features/users/application/use-cases/manage-user-access';
+import { SetStudentLevel } from '@/features/users/application/use-cases/set-student-level';
 import { SupabaseUserAdminGateway } from '@/features/users/infrastructure/supabase-user-admin-gateway';
 import type { AppSupabaseClient } from '@/shared/infrastructure/supabase/client';
 
@@ -179,6 +180,7 @@ export function createContainer(adapters: Adapters) {
       listUsers: new ListUsers(userAdmin),
       inviteUser: new InviteUser(userAdmin),
       changeUserRole: new ChangeUserRole(userAdmin),
+      setStudentLevel: new SetStudentLevel(userAdmin),
       resendAccess: new ResendAccess(userAdmin),
       deactivateUser: new DeactivateUser(userAdmin),
       reactivateUser: new ReactivateUser(userAdmin),

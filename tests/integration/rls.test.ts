@@ -667,3 +667,156 @@ describe('writing drafts', () => {
     expect(error).not.toBeNull();
   });
 });
+
+describe('cefr level access', () => {
+  // The shared `student` is B2 (createUser's default), matching all seeded content.
+  let a1Student: TestUser;
+  let unclassified: TestUser;
+  let a1CardId: string;
+  let b2CardId: string;
+
+  beforeAll(async () => {
+    [a1Student, unclassified] = await Promise.all([createUser('student', 'A1'), createUser('student', null)]);
+    const { data: b2 } = await adminClient
+      .from('flashcards')
+      .select('id')
+      .eq('level', 'B2')
+      .limit(1)
+      .single();
+    b2CardId = b2?.id ?? '';
+    const { data: a1 } = await adminClient
+      .from('flashcards')
+      .insert({
+        level: 'A1',
+        category: 'general',
+        position: 970001,
+        term: 'Haus',
+        translation: 'casa',
+        is_published: true,
+      })
+      .select('id')
+      .single();
+    a1CardId = a1?.id ?? '';
+  });
+
+  it('shows a student only the content of their level', async () => {
+    const a1Sees = await a1Student.client.from('flashcards').select('id').in('id', [a1CardId, b2CardId]);
+    const b2Sees = await student.client.from('flashcards').select('id').in('id', [a1CardId, b2CardId]);
+    expect(a1Sees.data?.map((c) => c.id)).toEqual([a1CardId]);
+    expect(b2Sees.data?.map((c) => c.id)).toEqual([b2CardId]);
+  });
+
+  it('shows staff every level', async () => {
+    const teacherSees = await teacher.client.from('flashcards').select('id').in('id', [a1CardId, b2CardId]);
+    expect(new Set(teacherSees.data?.map((c) => c.id))).toEqual(new Set([a1CardId, b2CardId]));
+  });
+
+  it('shows an unclassified student no course content (fail-closed)', async () => {
+    const cards = await unclassified.client.from('flashcards').select('id', { count: 'exact', head: true });
+    const topics = await unclassified.client
+      .from('speaking_topics')
+      .select('id', { count: 'exact', head: true });
+    const exercises = await unclassified.client
+      .from('exercises')
+      .select('id', { count: 'exact', head: true });
+    expect(cards.count).toBe(0);
+    expect(topics.count).toBe(0);
+    expect(exercises.count).toBe(0);
+  });
+
+  it('gates student writes by level too', async () => {
+    // An A1 student cannot mark a B2 card: the insert policy requires the card to be visible to them.
+    const mark = await a1Student.client.from('flashcard_marks').upsert(
+      {
+        student_id: a1Student.id,
+        flashcard_id: b2CardId,
+        status: 'known',
+        updated_at: '2000-01-01T00:00:00Z',
+      },
+      { onConflict: 'student_id,flashcard_id' },
+    );
+    expect(mark.error).not.toBeNull();
+  });
+
+  it('lets only staff set a student level, and only on a student', async () => {
+    const byTeacher = await teacher.client.rpc('set_student_level', {
+      target: a1Student.id,
+      new_level: 'B1',
+    });
+    const { data: moved } = await adminClient
+      .from('profiles')
+      .select('level')
+      .eq('id', a1Student.id)
+      .single();
+    const byStudent = await student.client.rpc('set_student_level', {
+      target: otherStudent.id,
+      new_level: 'A1',
+    });
+    const onNonStudent = await teacher.client.rpc('set_student_level', {
+      target: teacher.id,
+      new_level: 'A1',
+    });
+
+    expect(byTeacher.error).toBeNull();
+    expect(moved?.level).toBe('B1');
+    expect(byStudent.error).not.toBeNull();
+    expect(onNonStudent.error).not.toBeNull();
+  });
+});
+
+describe('cefr level isolation (A1/A2/B1/B2)', () => {
+  const LEVELS = ['A1', 'A2', 'B1', 'B2'] as const;
+  type Level = (typeof LEVELS)[number];
+  const students = {} as Record<Level, TestUser>;
+  const probeId = {} as Record<Level, string>;
+
+  beforeAll(async () => {
+    await Promise.all(
+      LEVELS.map(async (level, i) => {
+        students[level] = await createUser('student', level);
+        const { data } = await adminClient
+          .from('flashcards')
+          .insert({
+            level,
+            category: 'general',
+            position: 980001 + i,
+            term: `Sonde-${level}`,
+            translation: `sonda ${level}`,
+            is_published: true,
+          })
+          .select('id')
+          .single();
+        probeId[level] = data?.id ?? '';
+      }),
+    );
+  });
+
+  it('shows each level only its own card and none of the other three', async () => {
+    const allProbes = LEVELS.map((l) => probeId[l]);
+    for (const level of LEVELS) {
+      const seen = await students[level].client.from('flashcards').select('id').in('id', allProbes);
+      expect(seen.data?.map((c) => c.id)).toEqual([probeId[level]]);
+    }
+  });
+
+  it('never leaks a row of another level: every visible card matches the student level', async () => {
+    for (const level of LEVELS) {
+      const { data } = await students[level].client.from('flashcards').select('level');
+      const distinct = new Set((data ?? []).map((c) => c.level));
+      expect([...distinct]).toEqual([level]);
+    }
+  });
+
+  it('gates the seeded A1–A2 vocabulary to the matching level', async () => {
+    // "die Mutter" is seeded only at A1 (familia); "der Bahnhof" only at A2 (cidade-e-transporte).
+    const a1Mutter = await students.A1.client.from('flashcards').select('level').eq('term', 'die Mutter');
+    const a2Mutter = await students.A2.client.from('flashcards').select('id').eq('term', 'die Mutter');
+    const a2Bahnhof = await students.A2.client.from('flashcards').select('level').eq('term', 'der Bahnhof');
+    const b1Bahnhof = await students.B1.client.from('flashcards').select('id').eq('term', 'der Bahnhof');
+
+    expect(a1Mutter.data).toEqual([{ level: 'A1' }]);
+    expect(a2Mutter.data).toHaveLength(0);
+    expect(a2Bahnhof.data).toEqual([{ level: 'A2' }]);
+    expect(b1Bahnhof.data).toHaveLength(0);
+  });
+});

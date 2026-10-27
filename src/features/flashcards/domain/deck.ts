@@ -1,5 +1,5 @@
 import type { CardStatus } from './card-status';
-import type { Flashcard, FlashcardCategory } from './flashcard';
+import type { Flashcard, WordType } from './flashcard';
 
 /** A card together with the signed-in student's status for it. */
 export interface DeckCard {
@@ -8,7 +8,9 @@ export interface DeckCard {
 }
 
 export interface DeckFilter {
-  readonly category: FlashcardCategory | 'all';
+  /** Theme slug, or the sentinel 'all' for no theme filter. */
+  readonly category: string;
+  readonly wordType: WordType | 'all';
   readonly status: CardStatus | 'all';
 }
 
@@ -18,6 +20,7 @@ export function filterDeck(cards: readonly DeckCard[], filter: DeckFilter): stri
     .filter(
       ({ card, status }) =>
         (filter.category === 'all' || card.category === filter.category) &&
+        (filter.wordType === 'all' || card.wordType === filter.wordType) &&
         (filter.status === 'all' || status === filter.status),
     )
     .map(({ card }) => card.id);

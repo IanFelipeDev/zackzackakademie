@@ -42,6 +42,12 @@ export function DashboardPage() {
         title="Painel de desempenho"
         description="Seu progresso nas quatro habilidades do Goethe-Zertifikat B2: Schreiben, Lesen, Hören e Sprechen."
       />
+      {user.level === null ? (
+        <Alert tone="info">
+          Seu nível ainda não foi definido, então o conteúdo de treino não aparece. Fale com a escola para
+          liberar o seu nível.
+        </Alert>
+      ) : null}
       {queries.some((q) => q.isPending) ? <Spinner label="Carregando seu desempenho…" /> : null}
       {queries.some((q) => q.isError) ? <Alert tone="error">{LOAD_ERROR}</Alert> : null}
       {submissions.data && practices.data && speakingStats.data ? (

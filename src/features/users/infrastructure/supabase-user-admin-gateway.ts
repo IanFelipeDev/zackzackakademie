@@ -1,5 +1,5 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
-import type { Role } from '@/shared/domain';
+import type { CefrLevel, Role } from '@/shared/domain';
 import { RepositoryError } from '@/shared/infrastructure/repository-error';
 import type { AppSupabaseClient } from '@/shared/infrastructure/supabase/client';
 import type { UserAdminGateway } from '../application/ports/user-admin-gateway';
@@ -64,7 +64,7 @@ export class SupabaseUserAdminGateway implements UserAdminGateway {
       .from('profiles')
       // user_presence is readable by admins only (RLS), which is who lists users.
       .select(
-        'id, email, display_name, role, created_at, must_change_password, deactivated_at, user_presence(last_seen_at)',
+        'id, email, display_name, role, level, created_at, must_change_password, deactivated_at, user_presence(last_seen_at)',
       )
       .order('display_name');
     if (error) throw new RepositoryError('Failed to list users', { cause: error });
@@ -73,6 +73,7 @@ export class SupabaseUserAdminGateway implements UserAdminGateway {
       email: row.email,
       displayName: row.display_name,
       role: row.role,
+      level: row.level,
       createdAt: new Date(row.created_at),
       accessStatus: accessStatusOf({
         deactivatedAt: toDate(row.deactivated_at),
@@ -96,6 +97,15 @@ export class SupabaseUserAdminGateway implements UserAdminGateway {
     const { data, error } = await this.client.from('profiles').update({ role }).eq('id', userId).select('id');
     if (error) throw new RepositoryError('Failed to change role', { cause: error });
     if (data.length === 0) throw new UserAdminForbiddenError();
+  }
+
+  async setStudentLevel(userId: string, level: CefrLevel): Promise<void> {
+    // The RPC re-checks the caller (staff) and the target (a student); both are surfaced as a forbidden error.
+    const { error } = await this.client.rpc('set_student_level', { target: userId, new_level: level });
+    if (!error) return;
+    // 42501 = caller is not staff; P0002 = target is not a student (raised by the RPC).
+    if (error.code === '42501' || error.code === 'P0002') throw new UserAdminForbiddenError({ cause: error });
+    throw new RepositoryError('Failed to set student level', { cause: error });
   }
 
   resendAccess(userId: string, loginUrl: string): Promise<void> {

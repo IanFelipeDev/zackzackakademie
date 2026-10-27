@@ -32,6 +32,9 @@ export function buildFlashcard(overrides: Partial<Flashcard> = {}): Flashcard {
     term: 'der Lebenslauf',
     translation: 'currículo',
     synonyms: [],
+    wordType: null,
+    extra: null,
+    extraKind: null,
     ...overrides,
   };
 }
