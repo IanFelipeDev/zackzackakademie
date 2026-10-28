@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { Badge, Button, formatDateTime, Icon } from '@/shared/ui';
 import type { DraftSummary } from '../../application/read-models';
 import { wordProgressPercent } from '../../domain/word-count';
-import { TASK_TYPE_LABELS } from '../task-type-labels';
+import { practicePath, TASK_TYPE_LABELS } from '../task-type-labels';
 import { excerpt } from '../excerpt';
 
 interface DraftCardProps {
@@ -44,7 +44,7 @@ export function DraftCard({ draft, isDeleting, onDelete }: DraftCardProps) {
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Link
-          to={`/treino?teil=${label.slug}&tema=${draft.exerciseId}`}
+          to={practicePath(draft.exerciseId, draft.taskType, draft.practiceMode)}
           className="inline-flex items-center gap-1.5 rounded-full bg-primary-container px-4 py-1.5 text-xs font-semibold text-white hover:bg-primary"
         >
           <Icon name="play_arrow" className="text-[16px]" />

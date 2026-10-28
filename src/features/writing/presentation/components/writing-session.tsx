@@ -50,6 +50,7 @@ export function WritingSession({
   const stopwatch = useStopwatch();
   const draft = useDraftAutosave({ exerciseId: exercise.id, studentId, content, initialContent });
   const wordCount = countWords(content);
+  const isFree = exercise.practiceMode === 'free';
 
   const submit = useMutation({
     mutationFn: () =>
@@ -74,7 +75,7 @@ export function WritingSession({
   function updateContent(value: string) {
     setContent(value);
     submit.reset();
-    if (!stopwatch.isRunning && stopwatch.seconds === 0 && value.length > 0) stopwatch.start();
+    if (!isFree && !stopwatch.isRunning && stopwatch.seconds === 0 && value.length > 0) stopwatch.start();
   }
 
   function insertPhrase(phrase: string) {
@@ -137,7 +138,9 @@ export function WritingSession({
             checkedPoints={checkedPoints}
             onTogglePoint={togglePoint}
           >
-            <RedemittelPanel groups={phraseGroups} onInsert={insertPhrase} />
+            {phraseGroups.length > 0 ? (
+              <RedemittelPanel groups={phraseGroups} onInsert={insertPhrase} />
+            ) : null}
           </ExerciseBrief>
         </div>
 
@@ -153,6 +156,7 @@ export function WritingSession({
               wordCount={wordCount}
               characterCount={countCharacters(content)}
               wordRange={exercise.wordRange}
+              showTimer={!isFree}
             />
 
             <label htmlFor="writing-area" className="sr-only">
@@ -217,7 +221,7 @@ export function WritingSession({
               </div>
             )}
           </Card>
-          <CriteriaStrip />
+          {isFree ? null : <CriteriaStrip />}
         </div>
       </div>
     </>

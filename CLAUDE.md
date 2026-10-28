@@ -87,8 +87,10 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   (`same_password` → `SamePasswordError`). Deactivated profiles, and flagged ones until they change the password, get no role from
   `app_current_role()`. There is deliberately **no self sign-up** (no page, no use
   case, `enable_signup = false`); don't reintroduce one. Never return, log or store temporary passwords.
-- **Writing page**: `WritingPracticePage` (URL params `teil`, `tema`) → `DraftLoader` (fetches the draft with
-  `gcTime: 0`) → `WritingSession` keyed by exercise id, so switching topics resets all local state.
+- **Writing page**: `WritingPracticePage` (URL params `modo` = simulado | livre, `teil`, `tema`) → `DraftLoader`
+  (fetches the draft with `gcTime: 0`) → `WritingSession` keyed by exercise id, so switching topics resets all
+  local state. Exercises are listed by `practice_mode`; Simulado derives its Teil tabs from the task types present
+  (so A1's single format shows none), Treino Livre is one open list and hides the timer, word range and Leitpunkte.
   Drafts autosave via `useDraftAutosave` (1.5 s debounce); submitting creates an immutable attempt and deletes the draft.
 
 ## Database
@@ -119,7 +121,13 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   theme slug and add nullable `word_type`, `extra`, `extra_kind`; seed ~880 A1/A2 cards (generated, not hand-written;
   deterministic ids, continuous positions per level+theme). B2 keeps the new columns null and is unchanged; level
   gating stays exact-match (A1≠A2≠B1≠B2), covered by the four-level isolation tests in `rls.test.ts`.
-- New migrations continue the numbering: `YYYYMMDD` + six-digit sequence (next: `YYYYMMDD000024_<name>.sql`).
+  `…24_practice_modes` + `…25_a1_schreiben_content` (ADR-0017): `practice_mode` (exam | free) on `exercises` and
+  `speaking_topics` (default `exam`, so B2 is unchanged) splits the UI into Simulado and Treino Livre; new
+  `writing_task_type` values `short_message`/`form`/`free_text`; `…25` seeds the A1 Schreiben content (both tabs)
+  under an A1 unit. `practice_mode` is presentation only, never in an RLS policy. Sprechen has the column but keeps
+  its exam-only UI for now (A1/free Sprechen is future work); A2/B1 content is drafted in
+  `docs/content-drafts/a2-b1-curriculum.md`, pending the teacher's review.
+- New migrations continue the numbering: `YYYYMMDD` + six-digit sequence (next: `YYYYMMDD000026_<name>.sql`).
 - Every new table: enable RLS, add policies, add cases to `tests/integration/rls.test.ts`, grant to `authenticated`.
   Edge Function behaviour is covered by `tests/integration/user-admin.test.ts`.
 - `database.types.ts` is generated; regenerate after each migration instead of editing by hand.

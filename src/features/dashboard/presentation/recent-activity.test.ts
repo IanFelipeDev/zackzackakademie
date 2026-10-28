@@ -9,6 +9,7 @@ function submission(id: string, feedback: SubmissionSummary['feedback']): Submis
     exerciseId: 'e1',
     exerciseTitle: `Text ${id}`,
     taskType: 'forum_post',
+    practiceMode: 'exam',
     attemptNumber: 1,
     content: 'Hallo',
     wordCount: 1,

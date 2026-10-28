@@ -30,7 +30,7 @@ export function ExerciseBrief({
         <div className="flex items-center justify-between gap-2">
           <label htmlFor="exercise-select" className="rubric flex items-center gap-1 text-ink-soft">
             <Icon name="topic" className="text-[15px] text-secondary" />
-            Thema do simulado
+            {exercise.practiceMode === 'free' ? 'Tema do treino livre' : 'Thema do simulado'}
           </label>
           <button
             type="button"
@@ -70,37 +70,39 @@ export function ExerciseBrief({
         </div>
       </div>
 
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-3 flex w-full items-center justify-between gap-2">
-          <span className="rubric flex items-center gap-1.5 text-primary">
-            <Icon name="checklist" className="text-[16px]" />
-            Leitpunkte (obrigatórios)
-          </span>
-          <span className="rounded-full bg-surface-high px-2 py-0.5 text-xs font-semibold text-secondary">
-            {checkedPoints.size} / {total} cumpridos
-          </span>
-        </legend>
-        {exercise.guidingPoints.map((point, index) => (
-          <label
-            key={`${index}-${point}`}
-            className="group flex cursor-pointer items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-surface-low"
-          >
-            <input
-              type="checkbox"
-              checked={checkedPoints.has(index)}
-              onChange={() => onTogglePoint(index)}
-              className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-primary-container"
-            />
-            <span
-              className={`text-sm leading-relaxed transition-colors group-hover:text-primary ${
-                checkedPoints.has(index) ? 'text-ink-soft line-through' : 'text-ink'
-              }`}
-            >
-              {index + 1}. {point}
+      {total > 0 ? (
+        <fieldset className="flex flex-col gap-3">
+          <legend className="mb-3 flex w-full items-center justify-between gap-2">
+            <span className="rubric flex items-center gap-1.5 text-primary">
+              <Icon name="checklist" className="text-[16px]" />
+              Leitpunkte (obrigatórios)
             </span>
-          </label>
-        ))}
-      </fieldset>
+            <span className="rounded-full bg-surface-high px-2 py-0.5 text-xs font-semibold text-secondary">
+              {checkedPoints.size} / {total} cumpridos
+            </span>
+          </legend>
+          {exercise.guidingPoints.map((point, index) => (
+            <label
+              key={`${index}-${point}`}
+              className="group flex cursor-pointer items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-surface-low"
+            >
+              <input
+                type="checkbox"
+                checked={checkedPoints.has(index)}
+                onChange={() => onTogglePoint(index)}
+                className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-primary-container"
+              />
+              <span
+                className={`text-sm leading-relaxed transition-colors group-hover:text-primary ${
+                  checkedPoints.has(index) ? 'text-ink-soft line-through' : 'text-ink'
+                }`}
+              >
+                {index + 1}. {point}
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      ) : null}
 
       {children}
     </Card>

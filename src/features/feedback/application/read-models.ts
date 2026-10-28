@@ -1,4 +1,5 @@
-export type ReviewTaskType = 'forum_post' | 'formal_email';
+/** Mirrors the writing feature's WRITING_TASK_TYPES; a teacher reviews submissions of every format. */
+export type ReviewTaskType = 'forum_post' | 'formal_email' | 'short_message' | 'form' | 'free_text';
 
 /** A submission waiting in the teacher's review queue. */
 export interface PendingSubmission {

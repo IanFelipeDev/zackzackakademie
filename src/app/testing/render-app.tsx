@@ -78,6 +78,17 @@ export function createTestBackend() {
       recipient: 'Herrn Groth (Museum)',
       wordRange: { min: 100, max: 120 },
     }),
+    buildExercise({
+      id: 'livre-1',
+      title: 'Mein Tag',
+      prompt: 'Schreiben Sie frei über Ihren Tag.',
+      taskType: 'free_text',
+      practiceMode: 'free',
+      position: 1,
+      guidingPoints: [],
+      recipient: null,
+      wordRange: null,
+    }),
   );
   writing.phrases.push(
     { id: 'p1', taskType: 'forum_post', category: 'Meinung äußern', text: 'Meines Erachtens …', position: 1 },

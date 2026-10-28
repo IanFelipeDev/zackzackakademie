@@ -150,6 +150,16 @@ describe('writing practice', () => {
     });
   });
 
+  it('opens the Treino Livre mode without the exam timer or Leitpunkte', async () => {
+    renderApp('/treino?modo=livre', signedInAs(STUDENT.email));
+
+    expect(await screen.findByText(/Schreiben Sie frei über Ihren Tag/)).toBeInTheDocument();
+    expect(screen.getByText(/Treino Livre · Modul Schreiben/)).toBeInTheDocument();
+    // The exam chrome (timer and the four Goethe criteria) is hidden in free practice.
+    expect(screen.queryByText('Tempo de prova')).not.toBeInTheDocument();
+    expect(screen.queryByText('1. Inhalt')).not.toBeInTheDocument();
+  });
+
   it('restores a saved draft when the topic is opened again', async () => {
     const backend = signedInAs(STUDENT.email);
     await backend.writing.draftRepository.save(

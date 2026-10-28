@@ -1,3 +1,4 @@
+import type { PracticeMode } from '@/shared/domain';
 import type { WritingTaskType } from '../domain/task-type';
 import type { WordRange } from '../domain/word-count';
 
@@ -15,6 +16,7 @@ export interface SubmissionSummary {
   readonly exerciseId: string;
   readonly exerciseTitle: string;
   readonly taskType: WritingTaskType;
+  readonly practiceMode: PracticeMode;
   readonly attemptNumber: number;
   readonly content: string;
   readonly wordCount: number;
@@ -35,6 +37,7 @@ export interface DraftSummary {
   readonly exerciseId: string;
   readonly exerciseTitle: string;
   readonly taskType: WritingTaskType;
+  readonly practiceMode: PracticeMode;
   readonly content: string;
   readonly wordCount: number;
   readonly wordRange: WordRange | null;

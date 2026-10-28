@@ -12,15 +12,15 @@ type ExerciseRow = Tables['exercises']['Row'];
 
 /** Columns needed to build a WritingExercise, including the parent lesson (title + order). */
 export const EXERCISE_COLUMNS =
-  'id, prompt, min_words, max_words, task_type, guiding_points, recipient, lessons!inner(title, position)';
+  'id, prompt, min_words, max_words, task_type, practice_mode, guiding_points, recipient, lessons!inner(title, position)';
 
 export type ExerciseWithLessonRow = Pick<
   ExerciseRow,
-  'id' | 'prompt' | 'min_words' | 'max_words' | 'task_type' | 'guiding_points' | 'recipient'
+  'id' | 'prompt' | 'min_words' | 'max_words' | 'task_type' | 'practice_mode' | 'guiding_points' | 'recipient'
 > & { lessons: { title: string; position: number } };
 
 export const SUBMISSION_COLUMNS = `id, exercise_id, attempt_number, content, duration_seconds, guiding_points_checked, created_at,
-  exercises!inner(prompt, task_type, guiding_points, min_words, max_words, lessons!inner(title)),
+  exercises!inner(prompt, task_type, practice_mode, guiding_points, min_words, max_words, lessons!inner(title)),
   feedback(comment, score, created_at, updated_at)`;
 
 export type SubmissionWithContextRow = Pick<
@@ -33,20 +33,25 @@ export type SubmissionWithContextRow = Pick<
   | 'guiding_points_checked'
   | 'created_at'
 > & {
-  exercises: Pick<ExerciseRow, 'prompt' | 'task_type' | 'guiding_points' | 'min_words' | 'max_words'> & {
+  exercises: Pick<
+    ExerciseRow,
+    'prompt' | 'task_type' | 'practice_mode' | 'guiding_points' | 'min_words' | 'max_words'
+  > & {
     lessons: { title: string };
   };
   feedback: Pick<Tables['feedback']['Row'], 'comment' | 'score' | 'created_at' | 'updated_at'> | null;
 };
 
 export const DRAFT_COLUMNS = `exercise_id, content, updated_at,
-  exercises!inner(task_type, min_words, max_words, lessons!inner(title))`;
+  exercises!inner(task_type, practice_mode, min_words, max_words, lessons!inner(title))`;
 
 export type DraftWithContextRow = Pick<
   Tables['writing_drafts']['Row'],
   'exercise_id' | 'content' | 'updated_at'
 > & {
-  exercises: Pick<ExerciseRow, 'task_type' | 'min_words' | 'max_words'> & { lessons: { title: string } };
+  exercises: Pick<ExerciseRow, 'task_type' | 'practice_mode' | 'min_words' | 'max_words'> & {
+    lessons: { title: string };
+  };
 };
 
 function toTaskType(value: string): WritingTaskType {
@@ -66,6 +71,7 @@ export function toExercise(row: ExerciseWithLessonRow): WritingExercise {
     position: row.lessons.position,
     prompt: row.prompt,
     taskType: toTaskType(row.task_type),
+    practiceMode: row.practice_mode,
     guidingPoints: row.guiding_points,
     recipient: row.recipient,
     wordRange: toWordRange(row.min_words, row.max_words),
@@ -99,6 +105,7 @@ export function toSubmissionDetail(row: SubmissionWithContextRow): SubmissionDet
     exerciseId: row.exercise_id,
     exerciseTitle: exercise.lessons.title,
     taskType: toTaskType(exercise.task_type),
+    practiceMode: exercise.practice_mode,
     attemptNumber: row.attempt_number,
     content: row.content,
     wordCount: countWords(row.content),
@@ -131,6 +138,7 @@ export function toDraftSummary(row: DraftWithContextRow): DraftSummary {
     exerciseId: row.exercise_id,
     exerciseTitle: row.exercises.lessons.title,
     taskType: toTaskType(row.exercises.task_type),
+    practiceMode: row.exercises.practice_mode,
     content: row.content,
     wordCount: countWords(row.content),
     wordRange: toWordRange(row.exercises.min_words, row.exercises.max_words),

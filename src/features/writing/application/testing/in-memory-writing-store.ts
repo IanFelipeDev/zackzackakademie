@@ -24,9 +24,9 @@ export class InMemoryWritingStore {
   private clock = 0;
 
   readonly exerciseRepository: ExerciseRepository = {
-    listByTaskType: (taskType) =>
+    listByMode: (mode) =>
       Promise.resolve(
-        this.exercises.filter((e) => e.taskType === taskType).sort((a, b) => a.position - b.position),
+        this.exercises.filter((e) => e.practiceMode === mode).sort((a, b) => a.position - b.position),
       ),
     findById: (id) => Promise.resolve(this.exercises.find((e) => e.id === id) ?? null),
   };
@@ -79,6 +79,7 @@ export class InMemoryWritingStore {
               exerciseId: draft.exerciseId,
               exerciseTitle: exercise.title,
               taskType: exercise.taskType,
+              practiceMode: exercise.practiceMode,
               content: draft.content,
               wordCount: countWords(draft.content),
               wordRange: exercise.wordRange,
@@ -95,6 +96,7 @@ export class InMemoryWritingStore {
       exerciseId: exercise.id,
       exerciseTitle: exercise.title,
       taskType: exercise.taskType,
+      practiceMode: exercise.practiceMode,
       attemptNumber: submission.attemptNumber,
       content: submission.content,
       wordCount: countWords(submission.content),
@@ -132,6 +134,7 @@ export function buildExercise(overrides: Partial<WritingExercise> = {}): Writing
     position: 1,
     prompt: 'Sie schreiben einen Forumsbeitrag zum Thema „Auto als umweltfreundliches Verkehrsmittel".',
     taskType: 'forum_post',
+    practiceMode: 'exam',
     guidingPoints: ['Meinung äußern', 'Gründe nennen', 'Alternativen nennen', 'Vorteile nennen'],
     recipient: null,
     wordRange: { min: 150, max: 180 },

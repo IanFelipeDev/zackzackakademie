@@ -2,12 +2,12 @@ import { Link } from 'react-router';
 import { Badge, formatDate, formatMinutes, Icon } from '@/shared/ui';
 import type { SubmissionSummary } from '../../application/read-models';
 import { excerpt } from '../excerpt';
-import { TASK_TYPE_LABELS } from '../task-type-labels';
+import { practicePath, TASK_TYPE_LABELS } from '../task-type-labels';
 
 export function SubmissionCard({ submission }: { submission: SubmissionSummary }) {
   const label = TASK_TYPE_LABELS[submission.taskType];
   const { feedback } = submission;
-  const practiceLink = `/treino?teil=${label.slug}&tema=${submission.exerciseId}`;
+  const practiceLink = practicePath(submission.exerciseId, submission.taskType, submission.practiceMode);
 
   return (
     <article className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-hairline bg-surface-lowest p-5 pl-6 shadow-paper">
