@@ -6,7 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 changes; record deviations as an ADR in `docs/adr/`. `docs/NEXT-STEPS.md` tracks project status and open items
 (email delivery, Vercel deploy, first CI run); update it when an item is done. `docs/glossary.md` fixes the
 domain terms, which are spelled the same in code, database and docs (e.g. Leitpunkte = `guidingPoints` /
-`guiding_points`, Redemittel = `UsefulPhrase` / `useful_phrases`); use it when naming new things.
+`guiding_points`, Redemittel = `UsefulPhrase` / `useful_phrases`); use it when naming new things. `README.md`
+covers the operational setup that isn't derivable from the code: `.env`, the one-time first-admin bootstrap SQL,
+the email-transport secrets, the Supabase dashboard settings (auth URLs, redirect URLs, password policy, sign-up
+disabled) and the Vercel deploy; consult it for anything environment- or deployment-related.
 
 ## Commands
 
