@@ -1,20 +1,22 @@
 import { Icon } from '@/shared/ui';
-import { WRITING_TASK_TYPES, type WritingTaskType } from '../../domain/task-type';
+import type { WritingTaskType } from '../../domain/task-type';
 import { TASK_TYPE_LABELS } from '../task-type-labels';
 
 interface TaskTypeTabsProps {
+  readonly options: readonly WritingTaskType[];
   readonly value: WritingTaskType;
   readonly onChange: (taskType: WritingTaskType) => void;
 }
 
-export function TaskTypeTabs({ value, onChange }: TaskTypeTabsProps) {
+export function TaskTypeTabs({ options, value, onChange }: TaskTypeTabsProps) {
+  if (options.length < 2) return null;
   return (
     <div
       role="radiogroup"
       aria-label="Parte do exame"
       className="inline-flex rounded-full bg-surface-highest p-1.5 shadow-inner"
     >
-      {WRITING_TASK_TYPES.map((taskType) => {
+      {options.map((taskType) => {
         const label = TASK_TYPE_LABELS[taskType];
         const isActive = taskType === value;
         return (

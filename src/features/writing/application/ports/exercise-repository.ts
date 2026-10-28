@@ -1,8 +1,8 @@
-import type { WritingTaskType } from '../../domain/task-type';
+import type { PracticeMode } from '@/shared/domain';
 import type { WritingExercise } from '../../domain/writing-exercise';
 
 export interface ExerciseRepository {
-  /** Published exercises of a task type, ordered by position. */
-  listByTaskType(taskType: WritingTaskType): Promise<WritingExercise[]>;
+  /** Published exercises of a practice mode visible to the current user, ordered by position. */
+  listByMode(mode: PracticeMode): Promise<WritingExercise[]>;
   findById(id: string): Promise<WritingExercise | null>;
 }

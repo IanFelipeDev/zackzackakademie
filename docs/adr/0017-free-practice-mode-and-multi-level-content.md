@@ -1,7 +1,14 @@
 # ADR-0017: Free-practice mode and multi-level content
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-27
+
+> Implementation note (2026-10-27): shipped for **Schreiben** — migration `…0024` adds the `practice_mode` enum and
+> columns plus the `short_message`/`form`/`free_text` task types; `…0025` seeds the A1 Schreiben content (Treino
+> Livre + Simulado); the writing page gained the Simulado/Treino Livre toggle. **Sprechen** has the
+> `practice_mode` column (default `exam`, harmless) but keeps its exam-only UI for now: its catalogue and staged
+> timer are shaped around the B2 exam parts, so A1/free Sprechen is a separate step. A2/B1 content stays as
+> `docs/content-drafts/a2-b1-curriculum.md` for the teacher to validate before seeding.
 
 ## Context
 

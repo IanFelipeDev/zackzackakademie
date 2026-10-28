@@ -4,6 +4,12 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-10-27: free-practice mode for Schreiben (ADR-0017). `practice_mode` (exam | free) on `exercises` and
+  `speaking_topics` (migration 0024, applied to the hosted DB; types regenerated); A1 Schreiben content seeded
+  (migration 0025: 4 Treino Livre + 5 Simulado topics). The writing page has a Simulado/Treino Livre toggle;
+  free practice hides the timer, word range and Leitpunkte. Shipped to `main`. Sprechen has the column but keeps
+  its exam-only UI (A1/free Sprechen is future work); A2/B1 content drafted in `docs/content-drafts/`, pending the
+  teacher's review. Students must be set to level A1 in `/admin/usuarios` to see the A1 content.
 - Phase 0 setup (Vite, TypeScript strict, Tailwind, ESLint layer boundaries, Vitest, CI), Supabase schema + RLS.
 - Goethe B2 Schreiben module: practice page, drafts, submission history, teacher review (teachers and admins
   both review at `/revisoes`).

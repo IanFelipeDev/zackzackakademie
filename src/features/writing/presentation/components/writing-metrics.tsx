@@ -15,6 +15,8 @@ interface WritingMetricsProps {
   readonly wordCount: number;
   readonly characterCount: CharacterCount;
   readonly wordRange: WordRange | null;
+  /** Treino Livre hides the exam timer; the word/character counter always shows. */
+  readonly showTimer?: boolean;
 }
 
 const WORD_STATUS_TEXT: Record<WordCountStatus, string> = {
@@ -39,41 +41,46 @@ export function WritingMetrics({
   wordCount,
   characterCount,
   wordRange,
+  showTimer = true,
 }: WritingMetricsProps) {
   const status = evaluateWordCount(wordCount, wordRange);
   return (
-    <div className="grid grid-cols-1 items-center gap-4 rounded-xl bg-surface-low/40 p-3 sm:grid-cols-2 sm:p-4">
-      <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-          <Icon name="schedule" className="text-[20px]" />
-        </span>
-        <div>
-          <p className="rubric text-ink-soft">Tempo de prova</p>
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-3xl font-bold text-primary tabular-nums" aria-live="off">
-              {formatClock(seconds)}
-            </span>
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={onToggleTimer}
-                aria-label={isRunning ? 'Pausar cronômetro' : 'Iniciar cronômetro'}
-                className="grid h-9 w-9 place-items-center sm:h-7 sm:w-7 rounded-full bg-surface-container text-primary hover:bg-surface-high"
-              >
-                <Icon name={isRunning ? 'pause' : 'play_arrow'} className="text-[16px]" />
-              </button>
-              <button
-                type="button"
-                onClick={onResetTimer}
-                aria-label="Zerar cronômetro"
-                className="grid h-9 w-9 place-items-center sm:h-7 sm:w-7 rounded-full bg-surface-container text-ink-soft hover:bg-surface-high hover:text-primary"
-              >
-                <Icon name="replay" className="text-[16px]" />
-              </button>
+    <div
+      className={`grid grid-cols-1 items-center gap-4 rounded-xl bg-surface-low/40 p-3 sm:p-4 ${showTimer ? 'sm:grid-cols-2' : ''}`}
+    >
+      {showTimer ? (
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+            <Icon name="schedule" className="text-[20px]" />
+          </span>
+          <div>
+            <p className="rubric text-ink-soft">Tempo de prova</p>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-3xl font-bold text-primary tabular-nums" aria-live="off">
+                {formatClock(seconds)}
+              </span>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={onToggleTimer}
+                  aria-label={isRunning ? 'Pausar cronômetro' : 'Iniciar cronômetro'}
+                  className="grid h-9 w-9 place-items-center sm:h-7 sm:w-7 rounded-full bg-surface-container text-primary hover:bg-surface-high"
+                >
+                  <Icon name={isRunning ? 'pause' : 'play_arrow'} className="text-[16px]" />
+                </button>
+                <button
+                  type="button"
+                  onClick={onResetTimer}
+                  aria-label="Zerar cronômetro"
+                  className="grid h-9 w-9 place-items-center sm:h-7 sm:w-7 rounded-full bg-surface-container text-ink-soft hover:bg-surface-high hover:text-primary"
+                >
+                  <Icon name="replay" className="text-[16px]" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
       <div className="flex items-center gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-secondary/10 text-secondary">

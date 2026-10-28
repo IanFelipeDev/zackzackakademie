@@ -24,9 +24,20 @@ beforeEach(() => {
     buildExercise({ id: 'teil1-a', position: 1 }),
     buildExercise({
       id: 'teil2-a',
+      position: 3,
       taskType: 'formal_email',
       recipient: 'Herrn Groth',
       wordRange: { min: 100, max: 120 },
+    }),
+    buildExercise({
+      id: 'free-a',
+      position: 1,
+      title: 'Minha rotina',
+      taskType: 'free_text',
+      practiceMode: 'free',
+      guidingPoints: [],
+      recipient: null,
+      wordRange: null,
     }),
   );
 });
@@ -42,9 +53,14 @@ function submit(content = 'Meines Erachtens ist das Auto bequem.', exerciseId = 
 }
 
 describe('exercises and phrases', () => {
-  it('lists exercises of one task type ordered by position', async () => {
-    const exercises = await new ListWritingExercises(store.exerciseRepository).execute('forum_post');
-    expect(exercises.map((e) => e.id)).toEqual(['teil1-a', 'teil1-b']);
+  it('lists exam exercises ordered by position, excluding free practice', async () => {
+    const exercises = await new ListWritingExercises(store.exerciseRepository).execute('exam');
+    expect(exercises.map((e) => e.id)).toEqual(['teil1-a', 'teil1-b', 'teil2-a']);
+  });
+
+  it('lists free-practice exercises separately from the exam ones', async () => {
+    const exercises = await new ListWritingExercises(store.exerciseRepository).execute('free');
+    expect(exercises.map((e) => e.id)).toEqual(['free-a']);
   });
 
   it('loads one exercise or fails when it does not exist', async () => {

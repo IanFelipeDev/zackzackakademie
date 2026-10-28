@@ -56,6 +56,7 @@ export type Database = {
           lesson_id: string
           max_words: number | null
           min_words: number | null
+          practice_mode: Database["public"]["Enums"]["practice_mode"]
           prompt: string
           recipient: string | null
           task_type: Database["public"]["Enums"]["writing_task_type"]
@@ -66,6 +67,7 @@ export type Database = {
           lesson_id: string
           max_words?: number | null
           min_words?: number | null
+          practice_mode?: Database["public"]["Enums"]["practice_mode"]
           prompt: string
           recipient?: string | null
           task_type?: Database["public"]["Enums"]["writing_task_type"]
@@ -76,6 +78,7 @@ export type Database = {
           lesson_id?: string
           max_words?: number | null
           min_words?: number | null
+          practice_mode?: Database["public"]["Enums"]["practice_mode"]
           prompt?: string
           recipient?: string | null
           task_type?: Database["public"]["Enums"]["writing_task_type"]
@@ -377,6 +380,7 @@ export type Database = {
           is_published: boolean
           level: Database["public"]["Enums"]["cefr_level"]
           position: number
+          practice_mode: Database["public"]["Enums"]["practice_mode"]
           prompt: string
           source_text: string | null
           task_type: Database["public"]["Enums"]["speaking_task_type"]
@@ -390,6 +394,7 @@ export type Database = {
           is_published?: boolean
           level: Database["public"]["Enums"]["cefr_level"]
           position: number
+          practice_mode?: Database["public"]["Enums"]["practice_mode"]
           prompt: string
           source_text?: string | null
           task_type: Database["public"]["Enums"]["speaking_task_type"]
@@ -403,6 +408,7 @@ export type Database = {
           is_published?: boolean
           level?: Database["public"]["Enums"]["cefr_level"]
           position?: number
+          practice_mode?: Database["public"]["Enums"]["practice_mode"]
           prompt?: string
           source_text?: string | null
           task_type?: Database["public"]["Enums"]["speaking_task_type"]
@@ -590,13 +596,19 @@ export type Database = {
     Enums: {
       app_role: "student" | "teacher" | "admin"
       cefr_level: "A1" | "A2" | "B1" | "B2"
+      practice_mode: "exam" | "free"
       speaking_exam: "goethe" | "telc"
       speaking_task_type:
         | "presentation"
         | "discussion"
         | "experience"
         | "planning"
-      writing_task_type: "forum_post" | "formal_email"
+      writing_task_type:
+        | "forum_post"
+        | "formal_email"
+        | "short_message"
+        | "form"
+        | "free_text"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -726,6 +738,7 @@ export const Constants = {
     Enums: {
       app_role: ["student", "teacher", "admin"],
       cefr_level: ["A1", "A2", "B1", "B2"],
+      practice_mode: ["exam", "free"],
       speaking_exam: ["goethe", "telc"],
       speaking_task_type: [
         "presentation",
@@ -733,7 +746,13 @@ export const Constants = {
         "experience",
         "planning",
       ],
-      writing_task_type: ["forum_post", "formal_email"],
+      writing_task_type: [
+        "forum_post",
+        "formal_email",
+        "short_message",
+        "form",
+        "free_text",
+      ],
     },
   },
 } as const

@@ -1,3 +1,4 @@
+import type { PracticeMode } from '@/shared/domain';
 import type { WritingTaskType } from './task-type';
 import type { WordRange } from './word-count';
 
@@ -8,6 +9,8 @@ export interface WritingExercise {
   readonly position: number;
   readonly prompt: string;
   readonly taskType: WritingTaskType;
+  /** Simulado (exam) or Treino Livre (free); decides whether the timer, word count and Leitpunkte show. */
+  readonly practiceMode: PracticeMode;
   /** Leitpunkte the text must address. */
   readonly guidingPoints: readonly string[];
   /** Addressee of a formal email (Teil 2); null for forum posts. */
