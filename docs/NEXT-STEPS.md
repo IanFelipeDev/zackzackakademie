@@ -4,6 +4,11 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-10-29: grammar games "Jogo da Girafa" (ADR-0018). New `games` feature (domain + presentation, no backend):
+  one quiz game per CEFR level (A1–B2) ported from the teacher's HTML, content in code, progress in `localStorage`,
+  gated to the student's level. Route `/jogos` and a "Jogos" item in `STUDENT_NAV`. C1 deferred (no C1 in the
+  `cefr_level` model). The Lesen A1/B2, B1 Schreiben/Sprechen and Hören B2 vocabulary the teacher also prepared are
+  NOT in yet — those HTML files were not available locally (still on the teacher's drive).
 - 2026-10-27: free-practice mode for Schreiben (ADR-0017). `practice_mode` (exam | free) on `exercises` and
   `speaking_topics` (migration 0024, applied to the hosted DB; types regenerated); A1 Schreiben content seeded
   (migration 0025: 4 Treino Livre + 5 Simulado topics). The writing page has a Simulado/Treino Livre toggle;
