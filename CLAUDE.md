@@ -43,8 +43,8 @@ adapters behind the real container and routes); use cases are tested with the in
 ## Architecture
 
 Feature-first, layered inside each feature (`src/features/{auth,writing,feedback,speaking,flashcards,users}/{domain,application,infrastructure,presentation}`,
-plus `dashboard` and `landing`, which only have a presentation layer; `dashboard` reads the other features through
-their public API),
+plus `games` (domain + presentation only; no backend, content in code, ADR-0018), plus `dashboard` and `landing`,
+which only have a presentation layer; `dashboard` reads the other features through their public API),
 plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
 
 - **Dependency rule is enforced by ESLint** (`eslint.config.js`, `eslint-plugin-boundaries` + `no-restricted-imports`):
@@ -66,7 +66,8 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   `queryClient.resetQueries()` so no cached data survives a user switch. `RequireRole` is UX only; RLS is the real
   boundary. `/` is the public landing page (ADR-0011; texts in `landing-content.ts`). Students own `/painel` (their home: performance dashboard), `/treino` and `/meus-textos`; teacher/admin own `/revisoes` (queue) and `/revisoes/historico`
   (corrected texts; feedback can be revised there, overwriting the old version) and `/avaliacoes-orais`
-  (Sprechen scores); students also own `/sprechen` (`?prova=telc&teil=1..3` for telc, Goethe by default) and `/flashcards` (vocabulary, ADR-0013/0016: B2 by category, plus A1/A2 by word type + theme, with DE↔PT toggle); admin owns
+  (Sprechen scores); students also own `/sprechen` (`?prova=telc&teil=1..3` for telc, Goethe by default), `/flashcards` (vocabulary, ADR-0013/0016: B2 by category, plus A1/A2 by word type + theme, with DE↔PT toggle) and `/jogos` (grammar games
+  "Jogo da Girafa", ADR-0018: one quiz game per CEFR level, content in code, progress in `localStorage`); admin owns
   `/admin/usuarios`. `Role` lives in `shared/domain` because several features need it.
 - **User admin** (ADR-0004, ADR-0005, ADR-0007): listing users and changing roles go straight to `profiles` under RLS.
   Online status / last access (ADR-0010): `usePresenceHeartbeat` in `AppLayout` calls `auth.recordActivity`
