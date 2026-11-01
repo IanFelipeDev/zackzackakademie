@@ -855,6 +855,19 @@ describe('Lesen', () => {
   });
 });
 
+describe('Regras de gramática', () => {
+  it('shows the reference sheets from the games page', async () => {
+    const user = userEvent.setup();
+    renderApp('/jogos', signedInAs(STUDENT.email));
+
+    await user.click(await screen.findByRole('link', { name: /regras de gramática/i }));
+    await screen.findByRole('heading', { name: 'Regras de gramática' });
+    expect(screen.getByRole('tab', { name: /der\/die\/das/i })).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: /verbos com preposição/i }));
+    expect(await screen.findByText('teilnehmen')).toBeInTheDocument();
+  });
+});
+
 describe('Hören', () => {
   it('shows the keyword trainer by Teil for the student level', async () => {
     const user = userEvent.setup();

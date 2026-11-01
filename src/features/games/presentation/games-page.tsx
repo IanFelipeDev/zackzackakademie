@@ -1,5 +1,6 @@
+import { Link } from 'react-router';
 import { useSignedInUser } from '@/features/auth';
-import { EmptyState, PageHeader } from '@/shared/ui';
+import { EmptyState, Icon, PageHeader } from '@/shared/ui';
 import { gameForLevel } from '../domain/content/catalog';
 import { GrammarGame } from './components/grammar-game';
 import { gamesEyebrow } from './game-labels';
@@ -19,6 +20,13 @@ export function GamesPage() {
         title="Jogos de Gramática"
         description="Treine a gramática do seu nível com a girafa: leia a regra, responda ao desafio e ganhe estrelas. Seu progresso fica salvo neste dispositivo."
       />
+      <Link
+        to="/regras"
+        className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-surface-low px-4 py-2 text-sm font-semibold text-primary hover:bg-surface-high"
+      >
+        <Icon name="menu_book" className="text-[18px]" />
+        Regras de gramática
+      </Link>
       {game ? (
         <GrammarGame game={game} />
       ) : (
