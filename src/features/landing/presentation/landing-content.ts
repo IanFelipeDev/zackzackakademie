@@ -117,6 +117,12 @@ export const PLATFORM_AVAILABLE: readonly Card[] = [
     text: 'Provas de leitura no formato oficial do Goethe (A1 e B2), com questões Richtig/Falsch e múltipla escolha, correção automática e gabarito.',
   },
   {
+    icon: 'headphones',
+    eyebrow: 'Hören',
+    title: 'Guia de audição',
+    text: 'Os temas e as palavras-chave que mais aparecem na prova de audição, organizados por parte, para treinar o ouvido e reconhecer o assunto rápido.',
+  },
+  {
     icon: 'insights',
     eyebrow: 'Progresso',
     title: 'Painel de desempenho',
@@ -132,7 +138,6 @@ export const PLATFORM_AVAILABLE: readonly Card[] = [
 
 /** Planned features, shown as "Em breve" so nobody signs up expecting them today. */
 export const PLATFORM_COMING: readonly Pick<Card, 'icon' | 'title'>[] = [
-  { icon: 'headphones', title: 'Hören (audição)' },
   { icon: 'calendar_month', title: 'Planner e rotina de estudos' },
   { icon: 'slideshow', title: 'Slides e materiais das aulas' },
   { icon: 'hub', title: 'Curadoria de sites e ferramentas' },
