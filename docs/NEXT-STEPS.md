@@ -4,6 +4,13 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-11-01: telc Sprechen "Nota da Banca" (ADR-0019, migration 0026). The teacher now scores a telc practice on
+  the four official criteria (Ausdruck/Aufgabe/Grammatik 7/5/3/0, Aussprache 4/2/1/0) → 0–25 per Teil, shown as
+  "x/25"; the shared `score` keeps a derived 0–100 value so the dashboard still compares exams. Goethe keeps the
+  free 0–100 score. The exam total (0–75, pass ≥ 45) is aggregated across the three Teile and will be surfaced with
+  the chained Simulado. Migration 0026 applied to the hosted DB and types regenerated (matched). Part of the
+  teacher's site-plan roadmap (plan file `~/.claude/plans/delightful-waddling-bonbon.md`). Landing hero eyebrow also
+  changed to "Aulas de Alemão com a Melissa ✨" (shipped separately to main earlier the same day).
 - 2026-10-29: grammar games "Jogo da Girafa" (ADR-0018). New `games` feature (domain + presentation, no backend):
   one quiz game per CEFR level (A1–B2) ported from the teacher's HTML, content in code, progress in `localStorage`,
   gated to the student's level. Route `/jogos` and a "Jogos" item in `STUDENT_NAV`. C1 deferred (no C1 in the
@@ -107,8 +114,9 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Later phases (not started)
 
-- From the teacher's site plan (2026-09-30): official telc scoring for Sprechen (four criteria per Teil, 0–75,
-  pass at 45), a full mock exam (Teil 1 → 2 → 3 with random topics and no pause, Goethe and telc), a Stichpunkte
+- From the teacher's site plan (2026-09-30): ~~official telc scoring for Sprechen (four criteria per Teil, 0–75,
+  pass at 45)~~ done 2026-11-01 (ADR-0019; the 0–75 total surfaces with the mock exam), a full mock exam (Teil 1 →
+  2 → 3 with random topics and no pause, Goethe and telc), a Stichpunkte
   notepad for the preparation, unified status names across modules, notifications when a correction arrives.
 - Google sign-in, AI-assisted correction (Edge Function), other Stitch modules (Lesen, Hören,
   Flashcards), student voice recording for Sprechen, exam-code pairs ("Simulado #B2-04"), LGPD erasure for teachers who gave feedback.

@@ -6,7 +6,7 @@ import type { SpeakingRecordingStorage } from '../application/ports/speaking-rec
 import type { SpeakingTopicRepository } from '../application/ports/speaking-topic-repository';
 import type { PracticeForAssessment, SpeakingPracticeSummary } from '../application/read-models';
 import { AssessmentNotFoundError, PracticeAlreadyAssessedError } from '../domain/errors';
-import type { AssessmentContent, SpeakingAssessment } from '../domain/speaking-assessment';
+import type { AssessmentContent, SpeakingAssessment, TelcRubric } from '../domain/speaking-assessment';
 import type { SpeakingPractice } from '../domain/speaking-practice';
 import type { SpeakingExam } from '../domain/exam';
 import type { SpeakingTopic } from '../domain/speaking-topic';
@@ -21,6 +21,16 @@ import {
 } from './speaking-mappers';
 
 const UNIQUE_VIOLATION = '23505';
+
+/** The four telc rubric columns; all null for a free Goethe score. */
+function rubricColumns(rubric: TelcRubric | null) {
+  return {
+    rubric_ausdruck: rubric?.ausdruck ?? null,
+    rubric_aufgabe: rubric?.aufgabe ?? null,
+    rubric_grammatik: rubric?.grammatik ?? null,
+    rubric_aussprache: rubric?.aussprache ?? null,
+  };
+}
 
 /** Private bucket created by migration 0020; storage policies limit access to the student and staff. */
 export const RECORDINGS_BUCKET = 'speaking-recordings';
@@ -113,6 +123,7 @@ export class SupabaseSpeakingAssessmentRepository implements SpeakingAssessmentR
       teacher_id: assessment.teacherId,
       score: assessment.score,
       comment: assessment.comment,
+      ...rubricColumns(assessment.rubric),
     });
     if (error?.code === UNIQUE_VIOLATION) throw new PracticeAlreadyAssessedError(assessment.practiceId);
     if (error) throw new RepositoryError('Failed to save speaking assessment', { cause: error });
@@ -121,7 +132,7 @@ export class SupabaseSpeakingAssessmentRepository implements SpeakingAssessmentR
   async update(practiceId: string, content: AssessmentContent): Promise<void> {
     const { data, error } = await this.client
       .from('speaking_assessments')
-      .update({ score: content.score, comment: content.comment })
+      .update({ score: content.score, comment: content.comment, ...rubricColumns(content.rubric ?? null) })
       .eq('practice_id', practiceId)
       .select('id');
     if (error) throw new RepositoryError('Failed to update speaking assessment', { cause: error });

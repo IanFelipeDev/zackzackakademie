@@ -363,6 +363,7 @@ describe('Sprechen', () => {
     backend.speaking.assessments.set(practice.id, {
       score: 72,
       comment: 'Gute Argumente, mehr Redemittel verwenden.',
+      rubric: null,
       teacherName: 'Melissa',
       createdAt: new Date('2026-09-20T10:00:00Z'),
       updatedAt: null,
@@ -421,6 +422,39 @@ describe('Sprechen', () => {
     await user.click(screen.getByRole('button', { name: /enviar avaliação/i }));
     expect(await screen.findByText('A nota vai de 0 a 100.')).toBeInTheDocument();
     expect(backend.speaking.assessments.size).toBe(0);
+  });
+
+  it('scores a telc practice with the four-criteria Nota da Banca (0–25 per Teil)', async () => {
+    const user = userEvent.setup();
+    const backend = signedInAs(TEACHER.email);
+    const practice = practiceOf('telc-1');
+    backend.speaking.practices.push(practice);
+    renderApp(`/avaliacoes-orais/${practice.id}`, backend);
+
+    await screen.findByRole('heading', { name: 'Nota da banca' });
+    // telc shows the official rubric, not the free 0–100 score.
+    expect(screen.queryByLabelText('Nota (0–100)')).not.toBeInTheDocument();
+    const pick = (group: string, name: RegExp) =>
+      user.click(within(screen.getByRole('radiogroup', { name: group })).getByRole('radio', { name }));
+    await pick('Expressão e fluência', /A \(7 pts\)/);
+    await pick('Cumprimento da tarefa', /B \(5 pts\)/);
+    await pick('Correção formal / gramática', /B \(5 pts\)/);
+    await pick('Pronúncia e entonação', /A \(4 pts\)/);
+    expect(screen.getByText('21/25')).toBeInTheDocument(); // live subtotal
+
+    await user.click(screen.getByRole('button', { name: /enviar avaliação/i }));
+
+    expect(await screen.findByText('Nada aguardando nota')).toBeInTheDocument();
+    expect(backend.speaking.assessments.get(practice.id)).toMatchObject({
+      score: 84, // 21/25 normalised to 0–100 for the dashboard
+      rubric: { ausdruck: 7, aufgabe: 5, grammatik: 5, aussprache: 4 },
+    });
+
+    await user.click(screen.getByRole('tab', { name: 'Avaliadas' }));
+    await user.click(await screen.findByRole('link', { name: /Ein Buch/ }));
+    expect((await screen.findAllByText('21/25')).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Subtotal desta Teil/)).toBeInTheDocument();
+    expect(screen.getByText(/aprovado ≥ 45/)).toBeInTheDocument();
   });
 
   it('keeps students out of the assessments', async () => {
@@ -701,6 +735,7 @@ describe('performance dashboard', () => {
     backend.speaking.assessments.set(practice.id, {
       score: 70,
       comment: '',
+      rubric: null,
       teacherName: 'Melissa',
       createdAt: new Date('2026-09-12T10:00:00Z'),
       updatedAt: null,

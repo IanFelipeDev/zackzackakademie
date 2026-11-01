@@ -441,6 +441,31 @@ describe('speaking', () => {
     expect(asAuthor.data).toEqual([{ score: 75 }]);
     expect(asOther.data).toHaveLength(0);
   });
+
+  it('stores the telc rubric columns together or not at all (ADR-0019)', async () => {
+    const { data: practice } = await insertPractice(student);
+    const full = await teacher.client
+      .from('speaking_assessments')
+      .insert({
+        practice_id: practice?.id ?? '',
+        teacher_id: teacher.id,
+        score: 84,
+        rubric_ausdruck: 7,
+        rubric_aufgabe: 5,
+        rubric_grammatik: 5,
+        rubric_aussprache: 4,
+      })
+      .select('rubric_ausdruck, rubric_aussprache');
+    expect(full.error).toBeNull();
+    expect(full.data?.[0]).toEqual({ rubric_ausdruck: 7, rubric_aussprache: 4 });
+
+    // A partial rubric (only one criterion) is rejected by the check constraint.
+    const { data: other } = await insertPractice(student);
+    const partial = await teacher.client
+      .from('speaking_assessments')
+      .insert({ practice_id: other?.id ?? '', teacher_id: teacher.id, score: 50, rubric_ausdruck: 7 });
+    expect(partial.error).not.toBeNull();
+  });
 });
 
 describe('speaking recordings', () => {

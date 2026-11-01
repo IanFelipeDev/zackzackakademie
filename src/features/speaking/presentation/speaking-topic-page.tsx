@@ -37,6 +37,7 @@ import {
 } from './speaking-labels';
 import { speakingErrorMessage } from './speaking-error-message';
 import { speakingQueryKeys } from './speaking-query-keys';
+import { formatAssessmentScore } from './speaking-rubric';
 
 export function SpeakingTopicPage() {
   const { speaking } = useContainer();
@@ -273,7 +274,9 @@ function PracticeItem({ practice }: { practice: SpeakingPracticeSummary }) {
           {formatDateTime(practice.createdAt)} · {formatClock(practice.durationSeconds)}
         </span>
         {assessment ? (
-          <span className="font-mono text-lg font-bold text-primary">{assessment.score}/100</span>
+          <span className="font-mono text-lg font-bold text-primary">
+            {formatAssessmentScore(assessment)}
+          </span>
         ) : (
           <Badge tone="warning">Aguardando avaliação</Badge>
         )}

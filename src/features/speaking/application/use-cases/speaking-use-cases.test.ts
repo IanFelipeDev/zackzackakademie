@@ -2,11 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AssessmentNotFoundError,
   InvalidPracticeDurationError,
+  InvalidSpeakingRubricError,
   InvalidSpeakingScoreError,
   PracticeAlreadyAssessedError,
   SpeakingPracticeNotFoundError,
   SpeakingTopicNotFoundError,
 } from '../../domain/errors';
+import type { TelcRubric } from '../../domain/speaking-assessment';
 import { buildSpeakingTopic, InMemorySpeakingStore } from '../testing/in-memory-speaking-store';
 import {
   AssessSpeakingPractice,
@@ -229,6 +231,51 @@ describe('teacher side', () => {
     await expect(assess('missing', 90)).rejects.toBeInstanceOf(SpeakingPracticeNotFoundError);
     await expect(assess(practice.id, 120)).rejects.toBeInstanceOf(InvalidSpeakingScoreError);
     expect(store.assessments.get(practice.id)?.score).toBe(80);
+  });
+
+  function assessRubric(practiceId: string, rubric: TelcRubric, comment = '') {
+    return new AssessSpeakingPractice(store.assessmentRepository).execute({
+      practiceId,
+      teacherId: TEACHER,
+      score: 0,
+      comment,
+      rubric,
+    });
+  }
+
+  it('scores a telc practice with the official four-criteria rubric, deriving the 0-100 score', async () => {
+    const practice = await practise('telc-1');
+    await assessRubric(practice.id, { ausdruck: 7, aufgabe: 5, grammatik: 5, aussprache: 4 }, 'Gut.');
+
+    const stored = store.assessments.get(practice.id);
+    expect(stored?.rubric).toEqual({ ausdruck: 7, aufgabe: 5, grammatik: 5, aussprache: 4 });
+    // Subtotal 21/25 maps to 84/100 so the dashboard can compare exams.
+    expect(stored?.score).toBe(84);
+    expect(stored?.comment).toBe('Gut.');
+  });
+
+  it('rejects a rubric with a band that is not official', async () => {
+    const practice = await practise('telc-1');
+    await expect(
+      assessRubric(practice.id, { ausdruck: 6, aufgabe: 5, grammatik: 5, aussprache: 4 }),
+    ).rejects.toBeInstanceOf(InvalidSpeakingRubricError);
+    expect(store.assessments.has(practice.id)).toBe(false);
+  });
+
+  it('revises a telc assessment, recomputing the score from the new rubric', async () => {
+    const practice = await practise('telc-1');
+    await assessRubric(practice.id, { ausdruck: 3, aufgabe: 3, grammatik: 3, aussprache: 1 });
+    await new UpdateSpeakingAssessment(store.assessmentRepository).execute({
+      practiceId: practice.id,
+      score: 0,
+      comment: 'Besser!',
+      rubric: { ausdruck: 7, aufgabe: 7, grammatik: 7, aussprache: 4 },
+    });
+
+    const stored = store.assessments.get(practice.id);
+    expect(stored?.score).toBe(100); // 25/25
+    expect(stored?.rubric).toEqual({ ausdruck: 7, aufgabe: 7, grammatik: 7, aussprache: 4 });
+    expect(stored?.comment).toBe('Besser!');
   });
 
   it('refuses to revise an assessment that does not exist', async () => {

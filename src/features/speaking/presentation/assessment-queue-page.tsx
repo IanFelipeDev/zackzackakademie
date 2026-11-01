@@ -15,6 +15,7 @@ import type { PracticeForAssessment } from '../application/read-models';
 import { partLabel } from './speaking-labels';
 import { speakingErrorMessage } from './speaking-error-message';
 import { speakingQueryKeys } from './speaking-query-keys';
+import { formatAssessmentScore } from './speaking-rubric';
 
 const TAB_PARAM = 'aba';
 const ASSESSED_TAB = 'avaliadas';
@@ -117,7 +118,9 @@ function PracticeLink({ practice }: { practice: PracticeForAssessment }) {
       </div>
       <div className="flex items-center gap-4">
         {assessment ? (
-          <span className="font-mono text-2xl font-bold text-primary">{assessment.score}/100</span>
+          <span className="font-mono text-2xl font-bold text-primary">
+            {formatAssessmentScore(assessment)}
+          </span>
         ) : null}
         <span className="inline-flex items-center gap-1 text-sm font-semibold whitespace-nowrap text-primary">
           {assessment ? 'Ver avaliação' : 'Avaliar'} <Icon name="arrow_forward" className="text-[18px]" />

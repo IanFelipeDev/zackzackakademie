@@ -2,6 +2,7 @@ import { isCefrLevel, type CefrLevel } from '@/shared/domain';
 import { RepositoryError } from '@/shared/infrastructure/repository-error';
 import type { Database } from '@/shared/infrastructure/supabase/database.types';
 import type { PracticeAssessment, PracticeForAssessment } from '../application/read-models';
+import { RUBRIC_CRITERIA, type TelcRubric } from '../domain/speaking-assessment';
 import { isSpeakingExam, type SpeakingExam } from '../domain/exam';
 import type { SpeakingTopic } from '../domain/speaking-topic';
 import { isSpeakingTaskType, type SpeakingTaskType } from '../domain/task-type';
@@ -30,7 +31,11 @@ export type SpeakingTopicRow = Pick<
 export const PRACTICE_COLUMNS = `id, topic_id, duration_seconds, created_at, recording_path,
   speaking_topics!inner(title, exam, task_type, prompt, guiding_points, source_text),
   profiles(display_name),
-  speaking_assessments(score, comment, created_at, updated_at, profiles(display_name))`;
+  speaking_assessments(score, comment, created_at, updated_at,
+    rubric_ausdruck, rubric_aufgabe, rubric_grammatik, rubric_aussprache,
+    profiles(display_name))`;
+
+type AssessmentRow = Tables['speaking_assessments']['Row'];
 
 export type PracticeRow = Pick<
   Tables['speaking_practices']['Row'],
@@ -42,7 +47,17 @@ export type PracticeRow = Pick<
   >;
   profiles: { display_name: string } | null;
   speaking_assessments:
-    | (Pick<Tables['speaking_assessments']['Row'], 'score' | 'comment' | 'created_at' | 'updated_at'> & {
+    | (Pick<
+        AssessmentRow,
+        | 'score'
+        | 'comment'
+        | 'created_at'
+        | 'updated_at'
+        | 'rubric_ausdruck'
+        | 'rubric_aufgabe'
+        | 'rubric_grammatik'
+        | 'rubric_aussprache'
+      > & {
         profiles: { display_name: string } | null;
       })
     | null;
@@ -78,10 +93,23 @@ export function toTopic(row: SpeakingTopicRow): SpeakingTopic {
   };
 }
 
+function toRubric(row: NonNullable<PracticeRow['speaking_assessments']>): TelcRubric | null {
+  const points = {
+    ausdruck: row.rubric_ausdruck,
+    aufgabe: row.rubric_aufgabe,
+    grammatik: row.rubric_grammatik,
+    aussprache: row.rubric_aussprache,
+  };
+  // The four columns are set together (telc) or all null (Goethe free score).
+  if (RUBRIC_CRITERIA.some((criterion) => points[criterion] === null)) return null;
+  return points as TelcRubric;
+}
+
 function toAssessment(row: NonNullable<PracticeRow['speaking_assessments']>): PracticeAssessment {
   return {
     score: row.score,
     comment: row.comment,
+    rubric: toRubric(row),
     teacherName: row.profiles?.display_name ?? '—',
     createdAt: new Date(row.created_at),
     updatedAt: row.updated_at ? new Date(row.updated_at) : null,
