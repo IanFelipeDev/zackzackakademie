@@ -122,9 +122,9 @@ function DashboardContent({ writingStats, speakingStats, activity }: DashboardCo
           </ReadyModuleCard>
         </li>
         <li>
-          <ComingSoonCard skill="Hören" label="Audição" icon="headphones">
-            Áudios com exercícios de compreensão no formato da prova.
-          </ComingSoonCard>
+          <ReadyModuleCard skill="Hören" label="Audição" icon="headphones" to="/horen" cta="Treinar Hören">
+            Os temas e palavras-chave que mais aparecem na prova de audição, por parte.
+          </ReadyModuleCard>
         </li>
       </ul>
 
@@ -223,50 +223,14 @@ function ReadyModuleCard({
   );
 }
 
-function ComingSoonCard({
-  skill,
-  label,
-  icon,
-  children,
-}: {
-  skill: string;
-  label: string;
-  icon: string;
-  children: ReactNode;
-}) {
-  return (
-    <Card as="article" tone="inset" aria-label={skill} className="flex h-full flex-col gap-3 opacity-80">
-      <div className="flex items-start justify-between gap-2">
-        <SkillHeading skill={skill} label={label} icon={icon} muted />
-        <Badge icon="schedule">Em breve</Badge>
-      </div>
-      <p className="text-sm text-ink-soft">{children}</p>
-    </Card>
-  );
-}
-
-function SkillHeading({
-  skill,
-  label,
-  icon,
-  muted = false,
-}: {
-  skill: string;
-  label: string;
-  icon: string;
-  muted?: boolean;
-}) {
+function SkillHeading({ skill, label, icon }: { skill: string; label: string; icon: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span
-        className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${
-          muted ? 'bg-surface-high text-outline' : 'bg-primary-container text-white'
-        }`}
-      >
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary-container text-white">
         <Icon name={icon} />
       </span>
       <div>
-        <h2 lang="de" className={`text-2xl leading-tight ${muted ? 'text-ink-soft' : 'text-primary'}`}>
+        <h2 lang="de" className="text-2xl leading-tight text-primary">
           {skill}
         </h2>
         <p className="rubric text-ink-soft">{label}</p>

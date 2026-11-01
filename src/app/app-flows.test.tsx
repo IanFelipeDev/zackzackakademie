@@ -37,8 +37,9 @@ describe('landing page', () => {
     const platform = screen.getByRole('region', { name: /Sua plataforma de estudos/ });
     expect(within(platform).getByText('Treino de fala com cronômetro')).toBeInTheDocument();
     expect(within(platform).getByText('Flashcards de vocabulário')).toBeInTheDocument();
+    expect(within(platform).getByText('Guia de audição')).toBeInTheDocument();
     expect(within(platform).getByText('Em breve na plataforma')).toBeInTheDocument();
-    expect(within(platform).getByText('Hören (audição)')).toBeInTheDocument();
+    expect(within(platform).getByText('Planner e rotina de estudos')).toBeInTheDocument();
 
     await user.click(screen.getByRole('link', { name: 'Entrar' }));
     expect(router.state.location.pathname).toBe('/entrar');
@@ -743,7 +744,7 @@ describe('Flashcards', () => {
 });
 
 describe('performance dashboard', () => {
-  it('is the student home and shows Schreiben and Sprechen progress, Lesen ready and Hören coming soon', async () => {
+  it('is the student home and shows Schreiben and Sprechen progress, with Lesen and Hören ready', async () => {
     const backend = signedInAs(STUDENT.email);
     const submission = WritingSubmission.create({
       exerciseId: 'teil1-1',
@@ -796,7 +797,8 @@ describe('performance dashboard', () => {
 
     const lesen = screen.getByRole('article', { name: 'Lesen' });
     expect(within(lesen).getByRole('link', { name: /treinar lesen/i })).toHaveAttribute('href', '/lesen');
-    expect(within(screen.getByRole('article', { name: 'Hören' })).getByText('Em breve')).toBeInTheDocument();
+    const hoeren = screen.getByRole('article', { name: 'Hören' });
+    expect(within(hoeren).getByRole('link', { name: /treinar hören/i })).toHaveAttribute('href', '/horen');
 
     const activity = screen.getByRole('region', { name: 'Últimas correções e avaliações' });
     const links = within(activity).getAllByRole('link');
@@ -834,6 +836,21 @@ describe('Lesen', () => {
     expect(await screen.findByText(/\/ 30/)).toBeInTheDocument();
     expect(screen.getByText(/mínimo: 18/)).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /refazer este simulado/i }).length).toBeGreaterThan(0);
+  });
+});
+
+describe('Hören', () => {
+  it('shows the keyword trainer by Teil for the student level', async () => {
+    const user = userEvent.setup();
+    renderApp('/horen', signedInAs(STUDENT.email));
+
+    await screen.findByRole('heading', { name: 'Audição (Hören)' });
+    expect(screen.getByText(/guia de temas e palavras-chave/i)).toBeInTheDocument();
+    // Four Teil tabs; switching changes the section heading.
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(4);
+    await user.click(screen.getByRole('tab', { name: 'Teil 3' }));
+    expect((await screen.findAllByText(/Ordem:/)).length).toBeGreaterThan(0);
   });
 });
 

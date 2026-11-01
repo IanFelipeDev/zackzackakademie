@@ -4,6 +4,11 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-11-01: **Hören module** (ADR-0021). New content-in-code `listening` feature: the teacher's keyword/topic
+  trainer by Teil 1–4 (frequent topics, keywords and Teil 3 speaker-order mnemonics), generated from her HTML by
+  `scratchpad/gen-hoeren.cjs`, gated to the student's level (B2), route `/horen`, `/painel` tile + landing module.
+  The full **audio simulator is deferred** until audio hosting is decided — its prototype has no embedded audio
+  (runtime file-upload slots). Content is the teacher's rough notes; she will refine. No migration.
 - 2026-11-01: **Lesen module** (ADR-0020). New presentation-first `reading` feature (content in code, like the
   games): Goethe A1 (4 simulados × 15 questions) and B2 (4 × 30), ported from the teacher's HTML by
   `scratchpad/gen-reading.cjs`, auto-graded in the browser with the official pass marks (A1 ≥ 9, B2 ≥ 18), gated to
