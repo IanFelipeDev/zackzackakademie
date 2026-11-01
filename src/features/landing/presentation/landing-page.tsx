@@ -158,7 +158,7 @@ function Hero() {
             <span className="h-3.5 w-2 rounded-sm bg-primary-container" />
             <span className="h-3.5 w-2 rounded-sm bg-tertiary" />
           </span>
-          Alemão do zero e exames (Goethe, telc)
+          Aulas de Alemão com a Melissa ✨
         </p>
         <h1
           style={rise(1)}
