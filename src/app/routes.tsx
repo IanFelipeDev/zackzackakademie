@@ -13,6 +13,7 @@ const loadFlashcards = () => import('@/features/flashcards/presentation');
 const loadGames = () => import('@/features/games/presentation');
 const loadReading = () => import('@/features/reading/presentation');
 const loadListening = () => import('@/features/listening/presentation');
+const loadGrammar = () => import('@/features/grammar/presentation');
 const loadDashboard = () => import('@/features/dashboard/presentation');
 const loadLanding = () => import('@/features/landing/presentation');
 
@@ -46,6 +47,7 @@ export const routes: RouteObject[] = [
       },
       { path: '/flashcards', lazy: async () => ({ Component: (await loadFlashcards()).FlashcardsPage }) },
       { path: '/jogos', lazy: async () => ({ Component: (await loadGames()).GamesPage }) },
+      { path: '/regras', lazy: async () => ({ Component: (await loadGrammar()).RegrasPage }) },
       { path: '/lesen', lazy: async () => ({ Component: (await loadReading()).LesenPage }) },
       { path: '/horen', lazy: async () => ({ Component: (await loadListening()).HoerenPage }) },
       {

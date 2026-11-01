@@ -4,6 +4,10 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-11-01: **Grammar reference sheets** (ADR-0024). New content-in-code `grammar` feature at `/regras`: the
+  gender rules (der/die/das groups, 111 words) and verbs with fixed prepositions (83 verbs, 12 prepositions),
+  generated from the teacher's HTML. Not level-gated (general reference); linked from `/jogos`. The C1 Grammatik
+  quiz-course is deferred (the C1 game covers C1). No migration.
 - 2026-11-01: **C1 level + C1 grammar game** (ADR-0023, migration 0027). `cefr_level` enum extended to C1 (applied
   to the hosted DB; types regenerated), `CEFR_LEVELS` gains C1, and the C1 "Jogo da Girafa" (14 topics, 81
   questions, generated from the teacher's HTML) completes the games A1–C1. C1 is now assignable in
