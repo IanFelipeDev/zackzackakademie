@@ -4,6 +4,10 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-11-01: **Flashcards "write the word" mode + B1–B2 label** (ADR-0022). A write mode beside the flip mode: the
+  Portuguese translation is the prompt, the student types the German term, checked tolerantly (case, umlaut/ß,
+  optional article, synonyms) by the now-shared `normalizeAnswer`/`isCorrect` (moved from `games/domain` to
+  `shared/domain`). The B2 vocabulary page is shown as "B1–B2" (label only; CEFR model unchanged). No migration.
 - 2026-11-01: **Hören module** (ADR-0021). New content-in-code `listening` feature: the teacher's keyword/topic
   trainer by Teil 1–4 (frequent topics, keywords and Teil 3 speaker-order mnemonics), generated from her HTML by
   `scratchpad/gen-hoeren.cjs`, gated to the student's level (B2), route `/horen`, `/painel` tile + landing module.

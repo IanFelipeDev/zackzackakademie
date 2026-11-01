@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CEFR_LEVELS } from '@/shared/domain';
-import { isCorrect, normalizeAnswer } from './answer-checking';
+import { isCorrect, normalizeAnswer } from '@/shared/domain';
 import { gameForLevel } from './content/catalog';
 import { buildGame } from './grammar-game';
 import { parseQuestion, wordTiles, type RawQuestion } from './grammar-question';
