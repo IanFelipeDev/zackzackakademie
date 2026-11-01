@@ -3,6 +3,7 @@ import { DomainError } from '@/shared/domain';
 const MESSAGES: Record<string, string> = {
   invalid_practice_duration: 'A duração da prática é inválida. Reinicie o cronômetro e tente de novo.',
   invalid_speaking_score: 'A nota deve ser um número inteiro de 0 a 100.',
+  invalid_speaking_rubric: 'Selecione uma banda (A, B, C ou D) em cada um dos quatro critérios.',
   assessment_comment_too_long: 'O comentário passou do limite de 5.000 caracteres.',
   speaking_topic_not_found: 'Não encontramos este tema.',
   speaking_practice_not_found: 'Não encontramos esta prática.',

@@ -1,10 +1,14 @@
 import type { SpeakingExam } from '../domain/exam';
+import type { TelcRubric } from '../domain/speaking-assessment';
 import type { SpeakingTopic, TopicStatus } from '../domain/speaking-topic';
 import type { SpeakingTaskType } from '../domain/task-type';
 
 export interface PracticeAssessment {
+  /** Shared 0–100 score; for telc it is derived from the rubric so the dashboard can compare exams. */
   readonly score: number;
   readonly comment: string;
+  /** telc: the four-criteria breakdown of this Teil (0–25). null for a free Goethe score. */
+  readonly rubric: TelcRubric | null;
   readonly teacherName: string;
   readonly createdAt: Date;
   /** Null until a teacher revises the assessment. */

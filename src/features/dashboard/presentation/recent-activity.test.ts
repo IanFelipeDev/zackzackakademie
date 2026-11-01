@@ -46,7 +46,14 @@ describe('recentActivity', () => {
         submission('c', { comment: 'gut', score: null, createdAt: at(5), updatedAt: null }),
       ],
       [
-        practice('x', { score: 80, comment: '', teacherName: 'Melissa', createdAt: at(7), updatedAt: null }),
+        practice('x', {
+          score: 80,
+          comment: '',
+          rubric: null,
+          teacherName: 'Melissa',
+          createdAt: at(7),
+          updatedAt: null,
+        }),
         practice('y', null),
       ],
     );

@@ -69,6 +69,7 @@ export class InMemorySpeakingStore {
       this.assessments.set(assessment.practiceId, {
         score: assessment.score,
         comment: assessment.comment,
+        rubric: assessment.rubric,
         teacherName: this.nameOf(assessment.teacherId),
         createdAt: assessment.createdAt,
         updatedAt: null,
@@ -78,7 +79,13 @@ export class InMemorySpeakingStore {
     update: (practiceId, content) => {
       const existing = this.assessments.get(practiceId);
       if (!existing) return Promise.reject(new AssessmentNotFoundError(practiceId));
-      this.assessments.set(practiceId, { ...existing, ...content, updatedAt: new Date() });
+      this.assessments.set(practiceId, {
+        ...existing,
+        score: content.score,
+        comment: content.comment,
+        rubric: content.rubric ?? null,
+        updatedAt: new Date(),
+      });
       return Promise.resolve();
     },
   };

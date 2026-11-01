@@ -290,6 +290,10 @@ export type Database = {
           created_at: string
           id: string
           practice_id: string
+          rubric_aufgabe: number | null
+          rubric_ausdruck: number | null
+          rubric_aussprache: number | null
+          rubric_grammatik: number | null
           score: number
           teacher_id: string
           updated_at: string | null
@@ -299,6 +303,10 @@ export type Database = {
           created_at?: string
           id?: string
           practice_id: string
+          rubric_aufgabe?: number | null
+          rubric_ausdruck?: number | null
+          rubric_aussprache?: number | null
+          rubric_grammatik?: number | null
           score: number
           teacher_id: string
           updated_at?: string | null
@@ -308,6 +316,10 @@ export type Database = {
           created_at?: string
           id?: string
           practice_id?: string
+          rubric_aufgabe?: number | null
+          rubric_ausdruck?: number | null
+          rubric_aussprache?: number | null
+          rubric_grammatik?: number | null
           score?: number
           teacher_id?: string
           updated_at?: string | null

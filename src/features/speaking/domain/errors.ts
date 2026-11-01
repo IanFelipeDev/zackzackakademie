@@ -16,6 +16,14 @@ export class InvalidSpeakingScoreError extends DomainError {
   }
 }
 
+export class InvalidSpeakingRubricError extends DomainError {
+  readonly code = 'invalid_speaking_rubric';
+
+  constructor() {
+    super('Each telc criterion must be scored with one of its official band points');
+  }
+}
+
 export class AssessmentCommentTooLongError extends DomainError {
   readonly code = 'assessment_comment_too_long';
 
