@@ -607,7 +607,7 @@ export type Database = {
     }
     Enums: {
       app_role: "student" | "teacher" | "admin"
-      cefr_level: "A1" | "A2" | "B1" | "B2"
+      cefr_level: "A1" | "A2" | "B1" | "B2" | "C1"
       practice_mode: "exam" | "free"
       speaking_exam: "goethe" | "telc"
       speaking_task_type:
@@ -749,7 +749,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["student", "teacher", "admin"],
-      cefr_level: ["A1", "A2", "B1", "B2"],
+      cefr_level: ["A1", "A2", "B1", "B2", "C1"],
       practice_mode: ["exam", "free"],
       speaking_exam: ["goethe", "telc"],
       speaking_task_type: [
