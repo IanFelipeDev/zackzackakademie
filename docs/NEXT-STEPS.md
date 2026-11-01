@@ -4,6 +4,10 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-11-01: **C1 level + C1 grammar game** (ADR-0023, migration 0027). `cefr_level` enum extended to C1 (applied
+  to the hosted DB; types regenerated), `CEFR_LEVELS` gains C1, and the C1 "Jogo da Girafa" (14 topics, 81
+  questions, generated from the teacher's HTML) completes the games A1–C1. C1 is now assignable in
+  `/admin/usuarios`. C1 DB content (units/topics/flashcards) can be authored later; gating already supports it.
 - 2026-11-01: **Flashcards "write the word" mode + B1–B2 label** (ADR-0022). A write mode beside the flip mode: the
   Portuguese translation is the prompt, the student types the German term, checked tolerantly (case, umlaut/ß,
   optional article, synonyms) by the now-shared `normalizeAnswer`/`isCorrect` (moved from `games/domain` to
