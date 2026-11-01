@@ -4,6 +4,12 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-11-01: chained **Simulado** for Sprechen. New `/sprechen/simulado?prova=goethe|telc` runs a full mock: for
+  telc the 20-minute preparation first, then each Teil in sequence with a randomly drawn published topic of the
+  student's level, the stage timer in real-exam mode (no pause, via the new `disablePause` on the timer dialog) and
+  the per-part practice aids; each Teil is recorded as a normal practice and queued for the teacher. The exam total
+  (0–75, pass ≥ 45) is the sum of the three per-Teil rubric grades (ADR-0019). A "Simulado completo" button on the
+  catalogue. Presentation-only, no migration. Part of the teacher's site-plan roadmap.
 - 2026-11-01: telc Sprechen "Nota da Banca" (ADR-0019, migration 0026). The teacher now scores a telc practice on
   the four official criteria (Ausdruck/Aufgabe/Grammatik 7/5/3/0, Aussprache 4/2/1/0) → 0–25 per Teil, shown as
   "x/25"; the shared `score` keeps a derived 0–100 value so the dashboard still compares exams. Goethe keeps the
@@ -115,8 +121,8 @@ Status on 2026-09-30. Update this file as items are done.
 ## Later phases (not started)
 
 - From the teacher's site plan (2026-09-30): ~~official telc scoring for Sprechen (four criteria per Teil, 0–75,
-  pass at 45)~~ done 2026-11-01 (ADR-0019; the 0–75 total surfaces with the mock exam), a full mock exam (Teil 1 →
-  2 → 3 with random topics and no pause, Goethe and telc), a Stichpunkte
+  pass at 45)~~ done 2026-11-01 (ADR-0019), ~~a full mock exam (Teil 1 → 2 → 3 with random topics and no pause,
+  Goethe and telc)~~ done 2026-11-01 (/sprechen/simulado), a Stichpunkte
   notepad for the preparation, unified status names across modules, notifications when a correction arrives.
 - Google sign-in, AI-assisted correction (Edge Function), other Stitch modules (Lesen, Hören,
   Flashcards), student voice recording for Sprechen, exam-code pairs ("Simulado #B2-04"), LGPD erasure for teachers who gave feedback.
