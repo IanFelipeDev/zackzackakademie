@@ -30,6 +30,8 @@ interface SpeakingTimerDialogProps {
   readonly finishLabel?: string;
   /** Lets the student finish before the timer has run, e.g. to skip the preparation. */
   readonly canSkip?: boolean;
+  /** Real-exam mode: once started the timer cannot be paused or restarted (Simulado). */
+  readonly disablePause?: boolean;
   /** Offers to record the student's voice for the teacher (the practice itself, not the preparation). */
   readonly allowRecording?: boolean;
   readonly isSaving?: boolean;
@@ -51,6 +53,7 @@ export function SpeakingTimerDialog({
   tools,
   finishLabel = 'Concluir prática',
   canSkip = false,
+  disablePause = false,
   allowRecording = false,
   isSaving = false,
   errorMessage = null,
@@ -193,16 +196,19 @@ export function SpeakingTimerDialog({
         {errorMessage ? <Alert tone="error">{errorMessage}</Alert> : null}
 
         <div className="mt-auto flex flex-wrap items-center justify-center gap-2">
-          <Button
-            variant={hasStarted ? 'secondary' : 'primary'}
-            size="lg"
-            icon={stopwatch.isRunning ? 'pause' : 'play_arrow'}
-            onClick={toggle}
-            disabled={isBusy}
-          >
-            {stopwatch.isRunning ? 'Pausar' : hasStarted ? 'Retomar' : 'Começar'}
-          </Button>
-          {hasStarted ? (
+          {/* In real-exam mode the timer runs straight through: once started it cannot be paused. */}
+          {!disablePause || !hasStarted ? (
+            <Button
+              variant={hasStarted ? 'secondary' : 'primary'}
+              size="lg"
+              icon={stopwatch.isRunning ? 'pause' : 'play_arrow'}
+              onClick={toggle}
+              disabled={isBusy}
+            >
+              {stopwatch.isRunning ? 'Pausar' : hasStarted ? 'Retomar' : 'Começar'}
+            </Button>
+          ) : null}
+          {hasStarted && !disablePause ? (
             <Button variant="ghost" icon="replay" onClick={restart} disabled={isBusy}>
               Reiniciar
             </Button>

@@ -49,6 +49,13 @@ export function SpeakingCatalogPage() {
           <div className="flex flex-wrap items-center gap-2">
             <SpeakingExamTabs value={exam} onChange={selectExam} />
             <SpeakingTaskTabs exam={exam} value={taskType} onChange={(next) => show(exam, next)} />
+            <Link
+              to={`/sprechen/simulado?prova=${exam}`}
+              className="press inline-flex items-center gap-1.5 rounded-full bg-primary-container px-4 py-2 text-sm font-semibold text-white hover:bg-primary"
+            >
+              <Icon name="timer" className="text-[18px]" />
+              Simulado completo
+            </Link>
           </div>
         }
       />

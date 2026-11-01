@@ -35,6 +35,10 @@ export const routes: RouteObject[] = [
       { path: '/meus-textos', lazy: async () => ({ Component: (await loadWriting()).MySubmissionsPage }) },
       { path: '/sprechen', lazy: async () => ({ Component: (await loadSpeaking()).SpeakingCatalogPage }) },
       {
+        path: '/sprechen/simulado',
+        lazy: async () => ({ Component: (await loadSpeaking()).SpeakingSimuladoPage }),
+      },
+      {
         path: '/sprechen/:topicId',
         lazy: async () => ({ Component: (await loadSpeaking()).SpeakingTopicPage }),
       },

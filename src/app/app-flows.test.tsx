@@ -607,6 +607,43 @@ describe('Sprechen', () => {
     await user.click(within(practice).getByRole('checkbox', { name: 'Essen und Getränke' }));
     expect(within(practice).getByText('Decidam juntos · 1/2')).toBeInTheDocument();
   });
+
+  it('offers a full simulado from the catalogue', async () => {
+    renderApp('/sprechen?prova=telc', signedInAs(STUDENT.email));
+    const link = await screen.findByRole('link', { name: /simulado completo/i });
+    expect(link).toHaveAttribute('href', '/sprechen/simulado?prova=telc');
+  });
+
+  it('runs a chained Goethe simulado without pause and records each Teil', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    const user = userEvent.setup({ advanceTimers: (ms) => vi.advanceTimersByTime(ms) });
+    const backend = signedInAs(STUDENT.email);
+    renderApp('/sprechen/simulado?prova=goethe', backend);
+
+    await user.click(await screen.findByRole('button', { name: /começar simulado/i }));
+
+    // Teil 1: once started there is no pause button (real-exam mode).
+    let dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: /começar/i }));
+    expect(within(dialog).queryByRole('button', { name: 'Pausar' })).not.toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(5_000);
+    });
+    await user.click(within(dialog).getByRole('button', { name: /próxima teil/i }));
+
+    // Teil 2.
+    dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: /começar/i }));
+    act(() => {
+      vi.advanceTimersByTime(5_000);
+    });
+    await user.click(within(dialog).getByRole('button', { name: /concluir o simulado/i }));
+
+    expect(await screen.findByText('Simulado concluído!')).toBeInTheDocument();
+    expect(backend.speaking.practices).toHaveLength(2);
+
+    vi.useRealTimers();
+  });
 });
 
 describe('Flashcards', () => {
