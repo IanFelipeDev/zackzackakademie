@@ -676,6 +676,22 @@ describe('Flashcards', () => {
     expect(screen.getByRole('button', { name: /Gehalt/ })).toBeInTheDocument();
   });
 
+  it('checks a typed answer in write mode under the B1–B2 label', async () => {
+    const user = userEvent.setup();
+    renderApp('/flashcards', signedInAs(STUDENT.email));
+
+    expect(await screen.findByText(/B1–B2/)).toBeInTheDocument();
+    await user.click(await screen.findByRole('button', { name: /escrever a palavra/i }));
+
+    // Card 1 asks for "currículo" → der Lebenslauf; the article is optional and the check is case-tolerant.
+    expect(await screen.findByText('currículo')).toBeInTheDocument();
+    await user.type(screen.getByRole('textbox', { name: /sua resposta em alemão/i }), 'lebenslauf');
+    await user.click(screen.getByRole('button', { name: /verificar/i }));
+
+    expect(await screen.findByText('Correto!')).toBeInTheDocument();
+    expect(screen.getByText('der Lebenslauf')).toBeInTheDocument();
+  });
+
   it('filters by category, shows the synonyms and moves with the arrow keys', async () => {
     const user = userEvent.setup();
     renderApp('/flashcards', signedInAs(STUDENT.email));

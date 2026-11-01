@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import { Button, Card, Icon } from '@/shared/ui';
-import { isCorrect } from '../../domain/answer-checking';
+import { isCorrect } from '@/shared/domain';
 import type { GrammarQuestion } from '../../domain/grammar-question';
 import type { GrammarTopic } from '../../domain/grammar-game';
 import { MAX_LIVES, starsForRound, WIN_BONUS_XP, xpForCorrect } from '../../domain/scoring';

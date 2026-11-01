@@ -4,7 +4,11 @@ import type { CardStatus, MarkStatus } from '../../domain/card-status';
 import { filterDeck, shuffle, type DeckCard, type DeckFilter } from '../../domain/deck';
 import { STATUS_LABELS } from '../flashcard-labels';
 import { FlashcardView, type StudyDirection } from './flashcard-view';
+import { FlashcardWrite } from './flashcard-write';
 import { PronunciationRecorder } from './pronunciation-recorder';
+
+/** How the student studies: flip the card, or write the German term from the Portuguese prompt. */
+export type StudyMode = 'flip' | 'write';
 
 const EMPTY_MESSAGES: Record<CardStatus | 'all', { title: string; body: string }> = {
   all: { title: 'Nenhum cartão nesta categoria', body: 'Escolha outra categoria acima.' },
@@ -27,6 +31,7 @@ interface FlashcardSessionProps {
   readonly cards: readonly DeckCard[];
   readonly filter: DeckFilter;
   readonly direction: StudyDirection;
+  readonly mode: StudyMode;
   readonly onMark: (flashcardId: string, status: MarkStatus) => void;
 }
 
@@ -34,7 +39,7 @@ interface FlashcardSessionProps {
  * One pass through the cards matching the filter. The order is fixed when the session starts, so a card does
  * not vanish from the pass when marking changes its status; the parent remounts the session when the filter changes.
  */
-export function FlashcardSession({ cards, filter, direction, onMark }: FlashcardSessionProps) {
+export function FlashcardSession({ cards, filter, direction, mode, onMark }: FlashcardSessionProps) {
   const [order, setOrder] = useState(() => filterDeck(cards, filter));
   const [index, setIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -97,14 +102,18 @@ export function FlashcardSession({ cards, filter, direction, onMark }: Flashcard
         </Badge>
       </div>
 
-      {/* Keyed by card so the next card starts on its front without playing the flip back. */}
-      <FlashcardView
-        key={current.card.id}
-        card={current.card}
-        direction={direction}
-        isFlipped={isFlipped}
-        onFlip={() => setIsFlipped((flipped) => !flipped)}
-      />
+      {/* Keyed by card so the next card starts fresh (front side, or an empty input). */}
+      {mode === 'write' ? (
+        <FlashcardWrite key={current.card.id} card={current.card} />
+      ) : (
+        <FlashcardView
+          key={current.card.id}
+          card={current.card}
+          direction={direction}
+          isFlipped={isFlipped}
+          onFlip={() => setIsFlipped((flipped) => !flipped)}
+        />
+      )}
       <PronunciationRecorder key={`recorder:${current.card.id}`} term={current.card.term} />
 
       <div className="grid grid-cols-2 gap-3">

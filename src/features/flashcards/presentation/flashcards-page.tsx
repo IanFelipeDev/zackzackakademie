@@ -12,7 +12,7 @@ import {
 } from '../domain/card-status';
 import type { DeckCard, DeckFilter } from '../domain/deck';
 import { WORD_TYPES, type WordType } from '../domain/flashcard';
-import { FlashcardSession } from './components/flashcard-session';
+import { FlashcardSession, type StudyMode } from './components/flashcard-session';
 import type { StudyDirection } from './components/flashcard-view';
 import { categoryLabel, STATUS_LABELS, WORD_TYPE_LABELS } from './flashcard-labels';
 import { flashcardQueryKeys } from './flashcard-query-keys';
@@ -33,6 +33,7 @@ export function FlashcardsPage() {
   });
   const [filter, setFilter] = useState<DeckFilter>(INITIAL_FILTER);
   const [direction, setDirection] = useState<StudyDirection>('de-pt');
+  const [mode, setMode] = useState<StudyMode>('flip');
 
   // Optimistic: the card shows its new status at once and rolls back if saving fails.
   const mark = useMutation({
@@ -124,23 +125,34 @@ export function FlashcardsPage() {
             >
               Só pendentes
             </Button>
+            {mode === 'flip' ? (
+              <Button
+                variant="soft"
+                size="sm"
+                icon="swap_horiz"
+                onClick={() => setDirection((d) => (d === 'de-pt' ? 'pt-de' : 'de-pt'))}
+              >
+                {direction === 'de-pt' ? 'Alemão → Português' : 'Português → Alemão'}
+              </Button>
+            ) : null}
             <Button
-              variant="soft"
+              variant={mode === 'write' ? 'primary' : 'soft'}
               size="sm"
-              icon="swap_horiz"
-              onClick={() => setDirection((d) => (d === 'de-pt' ? 'pt-de' : 'de-pt'))}
+              icon="keyboard"
+              onClick={() => setMode((m) => (m === 'flip' ? 'write' : 'flip'))}
             >
-              {direction === 'de-pt' ? 'Alemão → Português' : 'Português → Alemão'}
+              {mode === 'write' ? 'Modo escrita' : 'Escrever a palavra'}
             </Button>
           </div>
 
           {mark.isError ? <Alert tone="error">{SAVE_ERROR}</Alert> : null}
           {/* Keyed by the filter and direction: changing either starts a new pass through the matching cards. */}
           <FlashcardSession
-            key={`${filter.category}:${filter.wordType}:${filter.status}:${direction}`}
+            key={`${filter.category}:${filter.wordType}:${filter.status}:${direction}:${mode}`}
             cards={cards}
             filter={filter}
             direction={direction}
+            mode={mode}
             onMark={(flashcardId, status) => mark.mutate({ flashcardId, status })}
           />
         </div>
@@ -150,7 +162,8 @@ export function FlashcardsPage() {
 }
 
 function eyebrow(level: string | null): string {
-  if (level === 'B2') return 'Goethe-Zertifikat B2 · Vocabulário';
+  // The B2 deck covers B1–B2 vocabulary, so it is shown as "B1–B2" (ADR-0022).
+  if (level === 'B2') return 'Goethe-Zertifikat B1–B2 · Vocabulário';
   return level ? `Alemão ${level} · Vocabulário` : 'Vocabulário';
 }
 
