@@ -184,9 +184,12 @@ describe('temporary passwords', () => {
 
   it('grants no permissions until the temporary password is changed, even outside the app', async () => {
     const user = await createUserWithPassword('Temp0rary22xyz');
-    await adminClient.from('profiles').update({ must_change_password: true }).eq('id', user.id);
+    // Give the user a level so that, once the flag clears, they see B2 content and the draft insert succeeds.
+    // While the flag is set, app_current_level() is null (fail-closed, migration 0021), so they still see nothing.
+    await adminClient.from('profiles').update({ must_change_password: true, level: 'B2' }).eq('id', user.id);
     const { client } = await signIn(user.email, 'Temp0rary22xyz');
-    const exerciseId = await firstExerciseId(client);
+    // The flagged user can see no exercises, so fetch the B2 exercise through the already-classified student.
+    const exerciseId = await firstExerciseId(student.client);
     const draft = { exercise_id: exerciseId, student_id: user.id, content: 'Entwurf' };
 
     const ownProfile = await client
