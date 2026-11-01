@@ -111,6 +111,12 @@ export const PLATFORM_AVAILABLE: readonly Card[] = [
     text: 'Mais de 800 cartões por tema, de trabalho a meio ambiente, com tradução e sinônimos. Marque o que já sabe e o que quer revisar.',
   },
   {
+    icon: 'menu_book',
+    eyebrow: 'Lesen',
+    title: 'Simulados de leitura',
+    text: 'Provas de leitura no formato oficial do Goethe (A1 e B2), com questões Richtig/Falsch e múltipla escolha, correção automática e gabarito.',
+  },
+  {
     icon: 'insights',
     eyebrow: 'Progresso',
     title: 'Painel de desempenho',
@@ -126,7 +132,6 @@ export const PLATFORM_AVAILABLE: readonly Card[] = [
 
 /** Planned features, shown as "Em breve" so nobody signs up expecting them today. */
 export const PLATFORM_COMING: readonly Pick<Card, 'icon' | 'title'>[] = [
-  { icon: 'auto_stories', title: 'Lesen (leitura)' },
   { icon: 'headphones', title: 'Hören (audição)' },
   { icon: 'calendar_month', title: 'Planner e rotina de estudos' },
   { icon: 'slideshow', title: 'Slides e materiais das aulas' },

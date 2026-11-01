@@ -11,6 +11,7 @@ const loadUsers = () => import('@/features/users/presentation');
 const loadSpeaking = () => import('@/features/speaking/presentation');
 const loadFlashcards = () => import('@/features/flashcards/presentation');
 const loadGames = () => import('@/features/games/presentation');
+const loadReading = () => import('@/features/reading/presentation');
 const loadDashboard = () => import('@/features/dashboard/presentation');
 const loadLanding = () => import('@/features/landing/presentation');
 
@@ -44,6 +45,7 @@ export const routes: RouteObject[] = [
       },
       { path: '/flashcards', lazy: async () => ({ Component: (await loadFlashcards()).FlashcardsPage }) },
       { path: '/jogos', lazy: async () => ({ Component: (await loadGames()).GamesPage }) },
+      { path: '/lesen', lazy: async () => ({ Component: (await loadReading()).LesenPage }) },
       {
         path: '/meus-textos/:submissionId',
         lazy: async () => ({ Component: (await loadWriting()).SubmissionDetailPage }),
