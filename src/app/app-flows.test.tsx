@@ -743,7 +743,7 @@ describe('Flashcards', () => {
 });
 
 describe('performance dashboard', () => {
-  it('is the student home and shows Schreiben and Sprechen progress, with Lesen and Hören coming soon', async () => {
+  it('is the student home and shows Schreiben and Sprechen progress, Lesen ready and Hören coming soon', async () => {
     const backend = signedInAs(STUDENT.email);
     const submission = WritingSubmission.create({
       exerciseId: 'teil1-1',
@@ -794,9 +794,9 @@ describe('performance dashboard', () => {
     );
     expect(within(sprechen).getByText('70/100')).toBeInTheDocument();
 
-    for (const skill of ['Lesen', 'Hören']) {
-      expect(within(screen.getByRole('article', { name: skill })).getByText('Em breve')).toBeInTheDocument();
-    }
+    const lesen = screen.getByRole('article', { name: 'Lesen' });
+    expect(within(lesen).getByRole('link', { name: /treinar lesen/i })).toHaveAttribute('href', '/lesen');
+    expect(within(screen.getByRole('article', { name: 'Hören' })).getByText('Em breve')).toBeInTheDocument();
 
     const activity = screen.getByRole('region', { name: 'Últimas correções e avaliações' });
     const links = within(activity).getAllByRole('link');
@@ -812,6 +812,28 @@ describe('performance dashboard', () => {
     expect(await screen.findByText('Nenhum texto enviado ainda.')).toBeInTheDocument();
     expect(screen.getByText('Nenhuma prática registrada ainda.')).toBeInTheDocument();
     expect(screen.getByText(/a nota aparece aqui/)).toBeInTheDocument();
+  });
+});
+
+describe('Lesen', () => {
+  it('lists the level simulators, grades an attempt and shows the gabarito', async () => {
+    const user = userEvent.setup();
+    renderApp('/lesen', signedInAs(STUDENT.email));
+
+    // The B2 student sees the four B2 simulators.
+    expect(await screen.findAllByRole('heading', { name: /Simulado \d/ })).toHaveLength(4);
+    const [open] = await screen.findAllByRole('button', { name: /começar simulado/i });
+    await user.click(open!);
+
+    // Teil 1 is a matching select A–D; answer one question, then correct.
+    const [firstSelect] = await screen.findAllByRole('combobox');
+    await user.selectOptions(firstSelect!, 'A');
+    const [correct] = await screen.findAllByRole('button', { name: /corrigir e ver nota/i });
+    await user.click(correct!);
+
+    expect(await screen.findByText(/\/ 30/)).toBeInTheDocument();
+    expect(screen.getByText(/mínimo: 18/)).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /refazer este simulado/i }).length).toBeGreaterThan(0);
   });
 });
 

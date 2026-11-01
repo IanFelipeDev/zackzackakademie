@@ -117,9 +117,9 @@ function DashboardContent({ writingStats, speakingStats, activity }: DashboardCo
           </SkillCard>
         </li>
         <li>
-          <ComingSoonCard skill="Lesen" label="Leitura" icon="menu_book">
-            Textos com questões no formato da prova de leitura.
-          </ComingSoonCard>
+          <ReadyModuleCard skill="Lesen" label="Leitura" icon="menu_book" to="/lesen" cta="Treinar Lesen">
+            Simulados de leitura no formato da prova, com correção automática e gabarito.
+          </ReadyModuleCard>
         </li>
         <li>
           <ComingSoonCard skill="Hören" label="Audição" icon="headphones">
@@ -184,6 +184,35 @@ function SkillCard({ skill, label, icon, to, cta, children }: SkillCardProps) {
     <Card as="article" aria-label={skill} className="flex h-full flex-col gap-4">
       <SkillHeading skill={skill} label={label} icon={icon} />
       {children}
+      <Link
+        to={to}
+        className="mt-auto inline-flex items-center gap-1 self-start text-sm font-semibold text-primary hover:underline"
+      >
+        {cta} <Icon name="arrow_forward" className="text-[18px]" />
+      </Link>
+    </Card>
+  );
+}
+
+function ReadyModuleCard({
+  skill,
+  label,
+  icon,
+  to,
+  cta,
+  children,
+}: {
+  skill: string;
+  label: string;
+  icon: string;
+  to: string;
+  cta: string;
+  children: ReactNode;
+}) {
+  return (
+    <Card as="article" aria-label={skill} className="flex h-full flex-col gap-3">
+      <SkillHeading skill={skill} label={label} icon={icon} />
+      <p className="text-sm text-ink-soft">{children}</p>
       <Link
         to={to}
         className="mt-auto inline-flex items-center gap-1 self-start text-sm font-semibold text-primary hover:underline"

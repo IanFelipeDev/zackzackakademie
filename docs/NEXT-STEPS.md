@@ -4,6 +4,12 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-11-01: **Lesen module** (ADR-0020). New presentation-first `reading` feature (content in code, like the
+  games): Goethe A1 (4 simulados × 15 questions) and B2 (4 × 30), ported from the teacher's HTML by
+  `scratchpad/gen-reading.cjs`, auto-graded in the browser with the official pass marks (A1 ≥ 9, B2 ≥ 18), gated to
+  the student's level, best score per device in `localStorage`. Route `/lesen`; surfaced as the `/painel` Lesen
+  tile (was "Em breve") and moved to the landing's available modules — not a new nav item, to keep the header/phone
+  bar from overflowing. No migration. A2/B1/C1 Lesen pending content.
 - 2026-11-01: chained **Simulado** for Sprechen. New `/sprechen/simulado?prova=goethe|telc` runs a full mock: for
   telc the 20-minute preparation first, then each Teil in sequence with a randomly drawn published topic of the
   student's level, the stage timer in real-exam mode (no pause, via the new `disablePause` on the timer dialog) and
