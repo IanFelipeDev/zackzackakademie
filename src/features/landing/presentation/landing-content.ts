@@ -114,13 +114,7 @@ export const PLATFORM_AVAILABLE: readonly Card[] = [
     icon: 'menu_book',
     eyebrow: 'Lesen',
     title: 'Simulados de leitura',
-    text: 'Provas de leitura no formato oficial do Goethe (A1 e B2), com questões Richtig/Falsch e múltipla escolha, correção automática e gabarito.',
-  },
-  {
-    icon: 'headphones',
-    eyebrow: 'Hören',
-    title: 'Guia de audição',
-    text: 'Os temas e as palavras-chave que mais aparecem na prova de audição, organizados por parte, para treinar o ouvido e reconhecer o assunto rápido.',
+    text: 'Provas de leitura no formato oficial do Goethe (nível A1), com questões Richtig/Falsch e múltipla escolha, correção automática e gabarito.',
   },
   {
     icon: 'insights',

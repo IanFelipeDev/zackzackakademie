@@ -4,6 +4,16 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Done
 
+- 2026-11-10: **Goethe B2 content refresh** (ADR-0025, migration 0028). The teacher replaced every B2 Sprechen and
+  Schreiben topic. Migration 0028 deletes the old Goethe B2 `speaking_topics` (scoped `exam = 'goethe'`, cascading
+  practices/assessments, after deleting their recordings from the `speaking-recordings` bucket) and the old B2
+  Schreiben lessons (cascading exercises/drafts/submissions/feedback), then seeds 17 Teil 1 Vortrag + 8 Teil 2
+  Diskussion Sprechen topics and 22 Dupla pairs (22 Forumsbeiträge + 22 formal E-Mails) of Schreiben. telc and all
+  non-B2 levels untouched. **B2 Lesen and Hören removed** (code change, content-in-code): `reading` keeps only A1,
+  `listening` is now empty (B2 was its only content; feature kept dormant). The `/painel` Lesen/Hören tiles are now
+  gated on whether the student's level has content, so B2 sees neither. **PENDING: run `npm run db:push`** to apply
+  0028 to the hosted DB — this permanently deletes the current B2 students' submissions, feedback, oral practices
+  and recordings (the teacher's explicit request). No `database.types` change (data-only).
 - 2026-11-01: **Grammar reference sheets** (ADR-0024). New content-in-code `grammar` feature at `/regras`: the
   gender rules (der/die/das groups, 111 words) and verbs with fixed prepositions (83 verbs, 12 prepositions),
   generated from the teacher's HTML. Not level-gated (general reference); linked from `/jogos`. The C1 Grammatik

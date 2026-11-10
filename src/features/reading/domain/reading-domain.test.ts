@@ -4,9 +4,9 @@ import { gradeReading } from './grading';
 import { examQuestions, optionsForQuestion, totalQuestions, type ReadingExam } from './reading-exam';
 
 describe('reading content', () => {
-  it('has A1 and B2 simulators gated by level', () => {
+  it('has A1 simulators gated by level (B2 removed, ADR-0025)', () => {
     expect(readingExamsForLevel('A1')).toHaveLength(4);
-    expect(readingExamsForLevel('B2')).toHaveLength(4);
+    expect(readingExamsForLevel('B2')).toHaveLength(0);
     expect(readingExamsForLevel('A2')).toHaveLength(0);
     expect(readingExamsForLevel(null)).toHaveLength(0);
   });
