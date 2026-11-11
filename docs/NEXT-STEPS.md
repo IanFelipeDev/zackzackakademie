@@ -104,6 +104,10 @@ Status on 2026-09-30. Update this file as items are done.
 
 ## Resume here
 
+- **A1 Sprechen (Fala)** — PLANNED, not built. The A1 package's speaking half (4 Treino Livre + 5 Simulado) was
+  never implemented; the hosted DB has zero A1 `speaking_topics`. Content is not missing (it's in the doc tab); the
+  work is DB + module (the Sprechen module is still exam-shaped). Full plan, source links and the task_type/pair
+  design decisions in **`docs/a1-sprechen-plan.md`**.
 - **CEFR level access** (ADR-0015, `feat/cefr-level-access`, migration 0021): students are scoped to
   `profiles.level` and RLS shows each student only their level; staff assign it from `/admin/usuarios` via the
   `set_student_level` RPC. Fail-closed: a student with no level sees no content. **Not yet applied** — run
