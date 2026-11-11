@@ -5,16 +5,10 @@
 -- untouched. IDs are deterministic (md5 of a stable key) so the migration is idempotent.
 
 -- === Sprechen: remove the old Goethe B2 topics and everything recorded on them ===
--- Delete the audio recordings of those practices first (storage.objects has no FK cascade).
-delete from storage.objects o
-using public.speaking_practices p, public.speaking_topics t
-where o.bucket_id = 'speaking-recordings'
-  and o.name = p.recording_path
-  and p.recording_path is not null
-  and t.id = p.topic_id
-  and t.level = 'B2'
-  and t.exam = 'goethe';
-
+-- The audio files in the private `speaking-recordings` bucket (storage.objects has no FK cascade) are removed
+-- out-of-band via the Storage API, because the hosted Postgres blocks a direct DELETE on storage tables
+-- ("Direct deletion from storage tables is not allowed. Use the Storage API instead."). The paths are read from
+-- speaking_practices before this migration runs and deleted with `supabase storage rm` afterwards (see ADR-0025).
 -- Deleting the topics cascades to speaking_practices and speaking_assessments (ADR-0009 FKs).
 delete from public.speaking_topics where level = 'B2' and exam = 'goethe';
 

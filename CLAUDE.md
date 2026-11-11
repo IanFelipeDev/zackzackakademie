@@ -143,10 +143,12 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   can be scoped to C1; `CEFR_LEVELS` in `shared/domain` gains `C1` and level gating stays exact-match (A1≠A2≠B1≠B2≠C1).
   `…28_b2_goethe_content_refresh` (ADR-0025): the teacher replaced every Goethe B2 Sprechen and Schreiben topic;
   the migration deletes the old Goethe B2 `speaking_topics` (scoped `exam = 'goethe'`, cascading practices/
-  assessments, after deleting their recordings from the `speaking-recordings` bucket) and the old B2 Schreiben
-  lessons (cascading exercises/drafts/submissions/feedback), then seeds 17 Teil 1 + 8 Teil 2 Sprechen topics and
-  22 Dupla pairs of Schreiben exercises. **Destructive and irreversible on the hosted DB**; telc and all non-B2
-  levels are untouched. B2 Lesen/Hören removal is a code change (content-in-code), not in this migration.
+  assessments) and the old B2 Schreiben lessons (cascading exercises/drafts/submissions/feedback), then seeds
+  17 Teil 1 + 8 Teil 2 Sprechen topics and 22 Dupla pairs of Schreiben exercises. The practice recordings in the
+  `speaking-recordings` bucket are **not** deleted in SQL — hosted Postgres refuses a direct `DELETE` on
+  `storage.objects` — so the paths are read first and the files removed with `supabase storage rm` right after
+  `db:push`. **Destructive and irreversible on the hosted DB**; telc and all non-B2 levels are untouched. B2
+  Lesen/Hören removal is a code change (content-in-code), not in this migration.
 - New migrations continue the numbering: `YYYYMMDD` + six-digit sequence (next: `YYYYMMDD000029_<name>.sql`).
 - Every new table: enable RLS, add policies, add cases to `tests/integration/rls.test.ts`, grant to `authenticated`.
   Edge Function behaviour is covered by `tests/integration/user-admin.test.ts`.

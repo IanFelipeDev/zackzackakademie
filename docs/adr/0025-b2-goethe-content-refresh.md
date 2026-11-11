@@ -20,11 +20,13 @@ telc (ADR-0012), every non-B2 level, flashcards, games and grammar reference are
 ## Decision
 
 - **A single destructive data migration** (`…28_b2_goethe_content_refresh`) refreshes the database content:
-  - Sprechen: delete the audio recordings of the old Goethe B2 practices from the `speaking-recordings` Storage
-    bucket (no FK cascade), then `delete from speaking_topics where level = 'B2' and exam = 'goethe'`, which
-    cascades to `speaking_practices` and `speaking_assessments`. Insert the 17 new Teil 1 Vortrag topics (the three
+  - Sprechen: `delete from speaking_topics where level = 'B2' and exam = 'goethe'`, which cascades to
+    `speaking_practices` and `speaking_assessments`. Insert the 17 new Teil 1 Vortrag topics (the three
     fixed Leitpunkte) and 8 new Teil 2 Diskussion topics (each with its Gesichtspunkte). Scoping by `exam = 'goethe'`
-    leaves the 19 telc B2 topics intact.
+    leaves the 19 telc B2 topics intact. The practice **audio files** in the private `speaking-recordings` bucket
+    have no FK cascade and the hosted Postgres **refuses a direct `DELETE` on `storage.objects`** ("Use the Storage
+    API instead."), so the migration does not touch storage: the recording paths are read from `speaking_practices`
+    beforehand and the files are deleted out-of-band with `supabase storage rm` right after `db:push`.
   - Schreiben: delete all lessons of the two B2 units (`zz:unit:b2:teil1`/`teil2`), which cascades to exercises and
     from there to `writing_drafts`, `writing_submissions` and `feedback`. The two units are kept. Insert 22 new
     Teil 1 forum-post lessons/exercises and 22 new Teil 2 formal-email lessons/exercises, position = Dupla number so
@@ -45,7 +47,9 @@ telc (ADR-0012), every non-B2 level, flashcards, games and grammar reference are
 ## Consequences
 
 - Running `db:push` on the hosted project **permanently deletes** the existing B2 Goethe students' submissions,
-  feedback, oral practices, assessments and recordings. This is the teacher's explicit request; there is no undo.
+  feedback, oral practices and assessments; the matching recording files are then removed via the Storage API.
+  This is the teacher's explicit request; there is no undo. (Applied 2026-11-10: 25 Goethe B2 speaking topics +
+  44 B2 exercises seeded, two orphaned recordings removed from the bucket.)
 - The migration is also replayed by the `database` CI job against a throwaway stack; the RLS fixture counts move
   from 40 → 44 exercises and 77 → 44 speaking topics for a B2 student.
 - `database.types.ts` is unchanged (data-only migration, no schema change).
