@@ -43,8 +43,11 @@ adapters behind the real container and routes); use cases are tested with the in
 ## Architecture
 
 Feature-first, layered inside each feature (`src/features/{auth,writing,feedback,speaking,flashcards,users}/{domain,application,infrastructure,presentation}`,
-plus `games` (domain + presentation only; no backend, content in code, ADR-0018), plus `dashboard` and `landing`,
-which only have a presentation layer; `dashboard` reads the other features through their public API),
+plus the presentation-first content-in-code features `games` (ADR-0018), `reading`/Lesen (ADR-0020; A1 only — B2
+removed per ADR-0025), `listening`/Hören (ADR-0021; dormant — its only content, B2, was removed per ADR-0025) and
+`grammar`/Regras (reference sheets, ADR-0024) — each
+`domain` + `presentation` only, no backend, no RLS, content ported from the teacher's HTML into code — plus `dashboard`
+and `landing`, which only have a presentation layer; `dashboard` reads the other features through their public API),
 plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
 
 - **Dependency rule is enforced by ESLint** (`eslint.config.js`, `eslint-plugin-boundaries` + `no-restricted-imports`):
@@ -66,9 +69,15 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   `queryClient.resetQueries()` so no cached data survives a user switch. `RequireRole` is UX only; RLS is the real
   boundary. `/` is the public landing page (ADR-0011; texts in `landing-content.ts`). Students own `/painel` (their home: performance dashboard), `/treino` and `/meus-textos`; teacher/admin own `/revisoes` (queue) and `/revisoes/historico`
   (corrected texts; feedback can be revised there, overwriting the old version) and `/avaliacoes-orais`
-  (Sprechen scores); students also own `/sprechen` (`?prova=telc&teil=1..3` for telc, Goethe by default), `/flashcards` (vocabulary, ADR-0013/0016: B2 by category, plus A1/A2 by word type + theme, with DE↔PT toggle) and `/jogos` (grammar games
-  "Jogo da Girafa", ADR-0018: one quiz game per CEFR level, content in code, progress in `localStorage`); admin owns
-  `/admin/usuarios`. `Role` lives in `shared/domain` because several features need it.
+  (Sprechen scores; a telc assessment uses the official per-Teil A/B/C/D rubric, ADR-0019, instead of a free 0–100
+  score). Students also own `/sprechen` (`?prova=telc&teil=1..3` for telc, Goethe by default), `/flashcards`
+  (vocabulary, ADR-0013/0016: B1–B2 by category, plus A1/A2 by word type + theme, DE↔PT toggle, plus a "write the
+  word" study mode PT→DE with a tolerant shared checker, ADR-0022), `/jogos` (grammar games "Jogo da Girafa",
+  ADR-0018/0023: one quiz game per CEFR level A1–C1, content in code, progress in `localStorage`), and — reached
+  from `/painel` and `/jogos`, not the main nav — `/lesen`, `/horen` and `/regras` (the `/painel` tiles for `/lesen`
+  and `/horen` show only when the student's level has content, so B2 — which lost both in ADR-0025 — sees neither).
+  Admin owns `/admin/usuarios`.
+  `Role` lives in `shared/domain` because several features need it.
 - **User admin** (ADR-0004, ADR-0005, ADR-0007): listing users and changing roles go straight to `profiles` under RLS.
   Online status / last access (ADR-0010): `usePresenceHeartbeat` in `AppLayout` calls `auth.recordActivity`
   every 2 min while the tab is visible; admins see it in `/admin/usuarios` (online = seen in the last 5 min).
@@ -128,7 +137,19 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   under an A1 unit. `practice_mode` is presentation only, never in an RLS policy. Sprechen has the column but keeps
   its exam-only UI for now (A1/free Sprechen is future work); A2/B1 content is drafted in
   `docs/content-drafts/a2-b1-curriculum.md`, pending the teacher's review.
-- New migrations continue the numbering: `YYYYMMDD` + six-digit sequence (next: `YYYYMMDD000026_<name>.sql`).
+  `…26_telc_sprechen_rubric` (ADR-0019): a telc Sprechen assessment stores the four official A/B/C/D criteria as
+  band-points (per-Teil subtotal 0–25), Goethe keeps its free 0–100 score; `…27_c1_level` (ADR-0023): adds `'C1'`
+  to the `cefr_level` enum (`add value if not exists`, additive — no existing row or policy changes) so students
+  can be scoped to C1; `CEFR_LEVELS` in `shared/domain` gains `C1` and level gating stays exact-match (A1≠A2≠B1≠B2≠C1).
+  `…28_b2_goethe_content_refresh` (ADR-0025): the teacher replaced every Goethe B2 Sprechen and Schreiben topic;
+  the migration deletes the old Goethe B2 `speaking_topics` (scoped `exam = 'goethe'`, cascading practices/
+  assessments) and the old B2 Schreiben lessons (cascading exercises/drafts/submissions/feedback), then seeds
+  17 Teil 1 + 8 Teil 2 Sprechen topics and 22 Dupla pairs of Schreiben exercises. The practice recordings in the
+  `speaking-recordings` bucket are **not** deleted in SQL — hosted Postgres refuses a direct `DELETE` on
+  `storage.objects` — so the paths are read first and the files removed with `supabase storage rm` right after
+  `db:push`. **Destructive and irreversible on the hosted DB**; telc and all non-B2 levels are untouched. B2
+  Lesen/Hören removal is a code change (content-in-code), not in this migration.
+- New migrations continue the numbering: `YYYYMMDD` + six-digit sequence (next: `YYYYMMDD000029_<name>.sql`).
 - Every new table: enable RLS, add policies, add cases to `tests/integration/rls.test.ts`, grant to `authenticated`.
   Edge Function behaviour is covered by `tests/integration/user-admin.test.ts`.
 - `database.types.ts` is generated; regenerate after each migration instead of editing by hand.
@@ -147,7 +168,7 @@ plus `src/shared/{domain,infrastructure,ui}` and `src/app`.
   `(hover: hover) and (pointer: fine)`, no infinite loops. The global reduced-motion rule in `index.css` stays.
 - Navigation per role is defined once in `src/app/app-layout.tsx` (`STUDENT_NAV`/`TEACHER_NAV`/`ADMIN_NAV`);
   `AppHeader` renders it as the header nav from `md` up (between `md` and `lg` only the logo
-  and the nav, and the user's name only from `xl`, so the five student items fit) and as a fixed bottom bar on phones (no `backdrop-filter`
+  and the nav, and the user's name only from `xl`, so the six student items fit) and as a fixed bottom bar on phones (no `backdrop-filter`
   on the header, it would break the fixed bar). Installable via `public/manifest.webmanifest`; there is deliberately
   no service worker / offline mode. Form fields stay at 16px so iOS does not zoom on focus.
 - Conventional Commits; a Husky pre-commit hook runs lint-staged. `main` is protected: work on `feat/*`, `fix/*`,

@@ -50,7 +50,7 @@ describe('curriculum', () => {
     const phrases = await student.client.from('useful_phrases').select('id', { count: 'exact', head: true });
     const anonymous = await anonClient().from('exercises').select('id');
 
-    expect(exercises.count).toBe(40);
+    expect(exercises.count).toBe(44);
     expect(phrases.count).toBeGreaterThan(0);
     expect(anonymous.data ?? []).toHaveLength(0);
   });
@@ -277,7 +277,7 @@ describe('speaking', () => {
   it('serves the published Goethe and telc B2 Sprechen topics to signed-in users only', async () => {
     const topics = await student.client.from('speaking_topics').select('id', { count: 'exact', head: true });
     const anonymous = await anonClient().from('speaking_topics').select('id');
-    expect(topics.count).toBe(77);
+    expect(topics.count).toBe(44);
     expect(anonymous.data ?? []).toHaveLength(0);
   });
 

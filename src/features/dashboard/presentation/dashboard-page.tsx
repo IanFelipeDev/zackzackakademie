@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { useContainer } from '@/app/context/container-context';
 import { useSignedInUser } from '@/features/auth';
+import { hoerenForLevel } from '@/features/listening';
+import { readingExamsForLevel } from '@/features/reading';
 import type { StudentSpeakingStats } from '@/features/speaking';
 import { computeWritingStats, type StudentWritingStats } from '@/features/writing';
 import { Alert, Badge, Card, formatDate, formatDateTime, Icon, PageHeader, Spinner } from '@/shared/ui';
@@ -40,7 +42,7 @@ export function DashboardPage() {
       <PageHeader
         eyebrow={`Olá, ${firstName}!`}
         title="Painel de desempenho"
-        description="Seu progresso nas quatro habilidades do Goethe-Zertifikat B2: Schreiben, Lesen, Hören e Sprechen."
+        description="Seu progresso em Schreiben e Sprechen, além dos módulos de treino liberados para o seu nível."
       />
       {user.level === null ? (
         <Alert tone="info">
@@ -68,7 +70,11 @@ interface DashboardContentProps {
 }
 
 function DashboardContent({ writingStats, speakingStats, activity }: DashboardContentProps) {
+  const user = useSignedInUser();
   const awaitingAssessment = speakingStats.totalPractices - speakingStats.assessedPractices;
+  // Lesen and Hören are shown only when the student's level actually has content (ADR-0025: B2 has neither now).
+  const hasLesen = readingExamsForLevel(user.level).length > 0;
+  const hasHoeren = hoerenForLevel(user.level) !== null;
   return (
     <div className="flex flex-col gap-8">
       <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -116,16 +122,20 @@ function DashboardContent({ writingStats, speakingStats, activity }: DashboardCo
             />
           </SkillCard>
         </li>
-        <li>
-          <ReadyModuleCard skill="Lesen" label="Leitura" icon="menu_book" to="/lesen" cta="Treinar Lesen">
-            Simulados de leitura no formato da prova, com correção automática e gabarito.
-          </ReadyModuleCard>
-        </li>
-        <li>
-          <ReadyModuleCard skill="Hören" label="Audição" icon="headphones" to="/horen" cta="Treinar Hören">
-            Os temas e palavras-chave que mais aparecem na prova de audição, por parte.
-          </ReadyModuleCard>
-        </li>
+        {hasLesen ? (
+          <li>
+            <ReadyModuleCard skill="Lesen" label="Leitura" icon="menu_book" to="/lesen" cta="Treinar Lesen">
+              Simulados de leitura no formato da prova, com correção automática e gabarito.
+            </ReadyModuleCard>
+          </li>
+        ) : null}
+        {hasHoeren ? (
+          <li>
+            <ReadyModuleCard skill="Hören" label="Audição" icon="headphones" to="/horen" cta="Treinar Hören">
+              Os temas e palavras-chave que mais aparecem na prova de audição, por parte.
+            </ReadyModuleCard>
+          </li>
+        ) : null}
       </ul>
 
       <section aria-labelledby="recent-activity-title">

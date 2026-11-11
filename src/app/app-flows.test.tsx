@@ -37,7 +37,7 @@ describe('landing page', () => {
     const platform = screen.getByRole('region', { name: /Sua plataforma de estudos/ });
     expect(within(platform).getByText('Treino de fala com cronômetro')).toBeInTheDocument();
     expect(within(platform).getByText('Flashcards de vocabulário')).toBeInTheDocument();
-    expect(within(platform).getByText('Guia de audição')).toBeInTheDocument();
+    expect(within(platform).getByText('Simulados de leitura')).toBeInTheDocument();
     expect(within(platform).getByText('Em breve na plataforma')).toBeInTheDocument();
     expect(within(platform).getByText('Planner e rotina de estudos')).toBeInTheDocument();
 
@@ -760,7 +760,7 @@ describe('Flashcards', () => {
 });
 
 describe('performance dashboard', () => {
-  it('is the student home and shows Schreiben and Sprechen progress, with Lesen and Hören ready', async () => {
+  it('is the student home and shows Schreiben and Sprechen progress, without Lesen or Hören at B2', async () => {
     const backend = signedInAs(STUDENT.email);
     const submission = WritingSubmission.create({
       exerciseId: 'teil1-1',
@@ -811,10 +811,9 @@ describe('performance dashboard', () => {
     );
     expect(within(sprechen).getByText('70/100')).toBeInTheDocument();
 
-    const lesen = screen.getByRole('article', { name: 'Lesen' });
-    expect(within(lesen).getByRole('link', { name: /treinar lesen/i })).toHaveAttribute('href', '/lesen');
-    const hoeren = screen.getByRole('article', { name: 'Hören' });
-    expect(within(hoeren).getByRole('link', { name: /treinar hören/i })).toHaveAttribute('href', '/horen');
+    // B2 no longer has Lesen or Hören content (ADR-0025), so those tiles are hidden for this student.
+    expect(screen.queryByRole('article', { name: 'Lesen' })).toBeNull();
+    expect(screen.queryByRole('article', { name: 'Hören' })).toBeNull();
 
     const activity = screen.getByRole('region', { name: 'Últimas correções e avaliações' });
     const links = within(activity).getAllByRole('link');
@@ -834,24 +833,11 @@ describe('performance dashboard', () => {
 });
 
 describe('Lesen', () => {
-  it('lists the level simulators, grades an attempt and shows the gabarito', async () => {
-    const user = userEvent.setup();
+  it('shows no simulators for a B2 student (B2 Lesen removed, ADR-0025)', async () => {
     renderApp('/lesen', signedInAs(STUDENT.email));
 
-    // The B2 student sees the four B2 simulators.
-    expect(await screen.findAllByRole('heading', { name: /Simulado \d/ })).toHaveLength(4);
-    const [open] = await screen.findAllByRole('button', { name: /começar simulado/i });
-    await user.click(open!);
-
-    // Teil 1 is a matching select A–D; answer one question, then correct.
-    const [firstSelect] = await screen.findAllByRole('combobox');
-    await user.selectOptions(firstSelect!, 'A');
-    const [correct] = await screen.findAllByRole('button', { name: /corrigir e ver nota/i });
-    await user.click(correct!);
-
-    expect(await screen.findByText(/\/ 30/)).toBeInTheDocument();
-    expect(screen.getByText(/mínimo: 18/)).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: /refazer este simulado/i }).length).toBeGreaterThan(0);
+    await screen.findByRole('heading', { name: 'Leitura (Lesen)' });
+    expect(screen.getByText('Nenhum simulado disponível')).toBeInTheDocument();
   });
 });
 
@@ -869,17 +855,11 @@ describe('Regras de gramática', () => {
 });
 
 describe('Hören', () => {
-  it('shows the keyword trainer by Teil for the student level', async () => {
-    const user = userEvent.setup();
+  it('shows no trainer for a B2 student (B2 Hören removed, ADR-0025)', async () => {
     renderApp('/horen', signedInAs(STUDENT.email));
 
     await screen.findByRole('heading', { name: 'Audição (Hören)' });
-    expect(screen.getByText(/guia de temas e palavras-chave/i)).toBeInTheDocument();
-    // Four Teil tabs; switching changes the section heading.
-    const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(4);
-    await user.click(screen.getByRole('tab', { name: 'Teil 3' }));
-    expect((await screen.findAllByText(/Ordem:/)).length).toBeGreaterThan(0);
+    expect(screen.getByText('Nenhum treino disponível')).toBeInTheDocument();
   });
 });
 
